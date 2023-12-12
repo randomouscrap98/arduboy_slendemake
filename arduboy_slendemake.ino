@@ -296,7 +296,7 @@ void load_sprite(uint8_t x, uint8_t y, uflot local_x, uflot local_y)
     //Try to add a sprite. We figure out the scale and accompanying bounding box based on frame (later)
     RcSprite<NUMINTERNALBYTES> * sp = raycast.sprites.addSprite(
         float(local_x + uflot::fromInternal(buffer[1] & 0x0F)), float(local_y + uflot::fromInternal(buffer[1] / 16)), 
-        buffer[0], 0, -7, NULL);
+        buffer[0], 0, -9, NULL);
 
     if(sp)
     {
@@ -361,6 +361,22 @@ void setup()
     drawMenu(false);
 }
 
+void drawRotBg()
+{
+    //raycast.render.drawRaycastBackground(&arduboy, raycastBg);
+    //return;
+    //The offset into the over-wide bg in fx 
+    uint16_t offset = (2 * M_PI - raycast.player.getAngle()) * ROTBGSCALE;
+    
+    //arduboy.drawRect(105, 30, 20, 8, BLACK);
+    //tinyfont.setCursor(105, 30);
+    //tinyfont.print(offset);
+
+    //We simply copy the buffer into the screen. That's all
+    for(uint8_t x = 0; x < 8; x++)
+        FX::readDataBytes(rotbg + offset + x * rotbgWidth, arduboy.sBuffer + x * WIDTH, SCREENWIDTH);
+}
+
 
 void loop()
 {
@@ -371,11 +387,12 @@ void loop()
 
     // Draw the correct background for the area. 
     //drawMenu(false);
-    raycast.render.drawRaycastBackground(&arduboy, raycastBg);
+    drawRotBg();
+    //raycast.render.drawRaycastBackground(&arduboy, raycastBg);
 
     raycast.runIteration(&arduboy);
 
-    raycast.worldMap.drawMap(&arduboy, 105, 0);
+    //raycast.worldMap.drawMap(&arduboy, 105, 0);
     //tinyfont.setCursor(0,0);
     //tinyfont.print(sprintmeter);
 
