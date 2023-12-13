@@ -78,8 +78,8 @@ print(f"Reading sprite data")
 for obj in objectlayer["objects"]:
     # Center the location. IDK why it's in the opposite corner compared to the
     # tiles... (see the - then +)
-    x = (obj["x"] - obj["width"] // 2) / tilesize
-    y = (obj["y"] + obj["height"] // 2) / tilesize
+    x = (obj["x"] + obj["width"] // 2) / tilesize
+    y = (obj["y"] - obj["height"] // 2) / tilesize
     id = max(0, obj["gid"] - spritegid)
 
     assert id > 0, f"Sprite ID invalid: {id}"

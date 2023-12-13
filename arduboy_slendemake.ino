@@ -24,10 +24,39 @@ Tinyfont tinyfont = Tinyfont(arduboy.sBuffer, Arduboy2::width(), Arduboy2::heigh
 uint8_t world_x = 3;
 uint8_t world_y = 3;
 
+uint8_t page_bitflag = 0;
 int16_t sprintmeter = SPRINTMAX;
 bool holding_b = false;
 
 RcContainer<NUMSPRITES, NUMINTERNALBYTES, SCREENWIDTH, HEIGHT> raycast(tilesheet, spritesheet, spritesheet_Mask);
+
+
+void setup()
+{
+    // Initialize the Arduboy
+    arduboy.boot();
+    arduboy.flashlight();
+    arduboy.initRandomSeed();
+    arduboy.setFrameRate(FRAMERATE);
+    FX::begin(FX_DATA_PAGE);    // initialise FX chip
+
+    world_x = 30;
+    world_y = 61;
+
+    raycast.render.spriteShading = RcShadingType::Black;
+    raycast.render.setLightIntensity(NORMALLIGHT);
+
+    raycast.render.spritescaling[0] = 3.0;
+    raycast.player.posX = CAGEX + 0.5;
+    raycast.player.posY = CAGEY + 0.5;
+    raycast.player.dirX = 0;
+    raycast.player.dirY = -1;
+
+    load_region();
+    load_surrounding_sprites();
+
+    drawSidebar();
+}
 
 bool isSolid(uflot x, uflot y)
 {
@@ -69,9 +98,6 @@ void movement()
         {
             rotation *= ROTMULTIPLIER;
             movement *= MOVEMULTIPLIER;
-
-            //if(!holding_b) //Only set this on START of run
-            //    raycast.render.setLightIntensity(SPRINTLIGHT);
         }
 
         //End with us knowing if they're holding B
@@ -79,9 +105,6 @@ void movement()
     }
     else
     {
-        //if(holding_b) //Only set this at the END of run
-        //    raycast.render.setLightIntensity(NORMALLIGHT);
-
         sprintmeter = min(sprintmeter + SPRINTRECOVER, SPRINTMAX);
         holding_b = false;
     }
@@ -142,52 +165,8 @@ void movement()
         drawMenu(arduboy.pressed(B_BUTTON) && menuIndex == 3);
 }*/
 
-// Draw just the menu section, does not overwrite the raycast area
-void drawMenu(bool showHint)
-{
-    constexpr uint8_t MENUX = 105;
-    constexpr uint8_t MENUY = 22;
-    constexpr uint8_t MENUSPACING = 6;
-
-    fastClear(&arduboy, raycast.render.VIEWWIDTH, 0, WIDTH,HEIGHT);
-    FASTRECT(arduboy, raycast.render.VIEWWIDTH + 1, 0, WIDTH - 1, HEIGHT - 1, WHITE);
-    arduboy.drawPixel(raycast.render.VIEWWIDTH + 3, 2, WHITE);
-    arduboy.drawPixel(WIDTH - 3, 2, WHITE);
-    arduboy.drawPixel(raycast.render.VIEWWIDTH + 3, HEIGHT - 3, WHITE);
-    arduboy.drawPixel(WIDTH - 3, HEIGHT - 3, WHITE);
-
-    /*
-    tinyfont.setCursor(109, 4);
-    tinyfont.print(F("3D"));
-    tinyfont.setCursor(105, 9);
-    tinyfont.print(F("MAZE"));
-
-    MazeSize mzs = getMazeSize(MAZESIZES, mazeSize);
-    tinyfont.setCursor(MENUX + 4, MENUY);
-    tinyfont.print(mzs.name);
-
-    MazeType mzt = getMazeType(MAZETYPES, mazeType);
-    tinyfont.setCursor(MENUX + 4, MENUY + MENUSPACING);
-    tinyfont.print(mzt.name);
-
-    tinyfont.setCursor(MENUX + 4, MENUY + MENUSPACING * 2);
-    tinyfont.print(F("NEW"));
-
-    tinyfont.setCursor(MENUX, MENUY + menuIndex * MENUSPACING);
-    tinyfont.print("o");
-    */
-}
-
 /*
-void behavior_bat(RcSprite<2> * sprite)
-{
-    sprite->x = 4 + cos((float)arduboy.frameCount / 4) / 2;
-    sprite->y = 3 + sin((float)arduboy.frameCount / 4) / 2;
-    sprite->state = (sprite->state & ~(RSSTATEYOFFSET)) | ((16 | uint8_t(15 * abs(sin((float)arduboy.frameCount / 11)))) << 3);
-}
-
-void behavior_animate_16(RcSprite<2> * sprite)
-{
+void behavior_animate_16(RcSprite<2> * sprite) {
     sprite->frame = sprite->intstate[0] + ((arduboy.frameCount >> 4) & (sprite->intstate[1] - 1));
 }
 */
@@ -221,16 +200,6 @@ void shift_sprites(int8_t x, int8_t y)
             }
         }
     }
-    //for(uint8_t i = 0; i < SPRITEGC_PERFRAME; i++)
-    //{
-    //    RcSprite<NUMINTERNALBYTES> * sp = raycast.sprites[spritegc_i];
-    //    if(sp->isActive())
-    //    {
-    //        if(sp->x < SPRITEBEGIN_X || sp->y < SPRITEBEGIN_Y || sp->x >= SPRITEEND_X + 1 || sp->y >= SPRITEEND_Y + 1)    
-    //            raycast.sprites.deleteSprite(sp);
-    //    }
-    //    spritegc_i = (spritegc_i + 1) % NUMSPRITES;
-    //}
 }
 
 // Load ALL sprites within the sprite view range
@@ -358,32 +327,6 @@ void load_region()
     }
 }
 
-void setup()
-{
-    // Initialize the Arduboy
-    arduboy.boot();
-    arduboy.flashlight();
-    arduboy.initRandomSeed();
-    arduboy.setFrameRate(FRAMERATE);
-    FX::begin(FX_DATA_PAGE);    // initialise FX chip
-
-    world_x = 30;
-    world_y = 61;
-
-    raycast.render.spriteShading = RcShadingType::Black;
-    raycast.render.setLightIntensity(NORMALLIGHT);
-
-    raycast.render.spritescaling[0] = 3.0;
-    raycast.player.posX = CAGEX + 0.5;
-    raycast.player.posY = CAGEY + 0.5;
-    raycast.player.dirX = 0;
-    raycast.player.dirY = -1;
-
-    load_region();
-    load_surrounding_sprites();
-
-    drawMenu(false);
-}
 
 void drawRotBg()
 {
@@ -395,6 +338,33 @@ void drawRotBg()
         FX::readDataBytes(rotbg + offset + x * rotbgWidth, arduboy.sBuffer + x * WIDTH, SCREENWIDTH);
 }
 
+void drawSidebar()
+{
+    fastClear(&arduboy, raycast.render.VIEWWIDTH, 0, WIDTH,HEIGHT);
+    arduboy.drawFastVLine(raycast.render.VIEWWIDTH + 1, 0, HEIGHT, WHITE);
+    constexpr uint8_t PAGEWIDTH = 6;
+    constexpr uint8_t PAGEHEIGHT = 8;
+    constexpr uint8_t PAGESPACE = 4;
+
+    for(uint8_t i = 0; i < 8; i++)
+    {
+        uint8_t x = raycast.render.VIEWWIDTH + 6 + (PAGESPACE + PAGEWIDTH) * (i & 1);
+        uint8_t y = 6 + (PAGEHEIGHT + PAGESPACE) * (i / 2);
+
+        if(page_bitflag & (1 << i)) {
+            arduboy.fillRect(x, y, PAGEWIDTH, PAGEHEIGHT, WHITE);
+        }
+        else {
+            arduboy.drawRect(x, y, PAGEWIDTH, PAGEHEIGHT, WHITE);
+        }
+    }
+}
+
+void drawSprintMeter()
+{
+    arduboy.drawFastHLine(raycast.render.VIEWWIDTH + 7, HEIGHT - 4, 15, BLACK);
+    arduboy.drawFastHLine(raycast.render.VIEWWIDTH + 7, HEIGHT - 4, 15 * sprintmeter / SPRINTMAX, WHITE);
+}
 
 void loop()
 {
@@ -404,9 +374,8 @@ void loop()
     movement();
 
     // Draw the correct background for the area. 
-    //drawMenu(false);
     drawRotBg();
-    //raycast.render.drawRaycastBackground(&arduboy, raycastBg);
+    drawSprintMeter();
 
     raycast.runIteration(&arduboy);
 
@@ -415,7 +384,4 @@ void loop()
     //tinyfont.print(sprintmeter);
 
     FX::display(false);
-
-    //Figure out sprite situation
-    //sprite_gc();
 }
