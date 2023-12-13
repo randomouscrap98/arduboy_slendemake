@@ -69,6 +69,9 @@ void movement()
         {
             rotation *= ROTMULTIPLIER;
             movement *= MOVEMULTIPLIER;
+
+            //if(!holding_b) //Only set this on START of run
+            //    raycast.render.setLightIntensity(SPRINTLIGHT);
         }
 
         //End with us knowing if they're holding B
@@ -76,6 +79,9 @@ void movement()
     }
     else
     {
+        //if(holding_b) //Only set this at the END of run
+        //    raycast.render.setLightIntensity(NORMALLIGHT);
+
         sprintmeter = min(sprintmeter + SPRINTRECOVER, SPRINTMAX);
         holding_b = false;
     }
@@ -227,6 +233,18 @@ void shift_sprites(int8_t x, int8_t y)
     //}
 }
 
+// Load ALL sprites within the sprite view range
+void load_surrounding_sprites()
+{
+    for(uint8_t y = SPRITEBEGIN_Y; y <= SPRITEEND_Y; y++)
+    {
+        for(uint8_t x = SPRITEBEGIN_X; x <= SPRITEEND_X; x++)
+        {
+            load_sprite(world_x - (CAGEX - x), world_y - (CAGEY - y), x, y);
+        }
+    }
+}
+
 // Figure out which sprites to load based on movement. May need to be changed if loading 
 // diagonally causes problems
 void load_sprites(int8_t ofs_x, int8_t ofs_y)
@@ -353,7 +371,7 @@ void setup()
     world_y = 61;
 
     raycast.render.spriteShading = RcShadingType::Black;
-    raycast.render.setLightIntensity(2.5);
+    raycast.render.setLightIntensity(NORMALLIGHT);
 
     raycast.render.spritescaling[0] = 3.0;
     raycast.player.posX = CAGEX + 0.5;
@@ -362,21 +380,16 @@ void setup()
     raycast.player.dirY = -1;
 
     load_region();
+    load_surrounding_sprites();
 
     drawMenu(false);
 }
 
 void drawRotBg()
 {
-    //raycast.render.drawRaycastBackground(&arduboy, raycastBg);
-    //return;
     //The offset into the over-wide bg in fx 
     uint16_t offset = (2 * M_PI - raycast.player.getAngle()) * ROTBGSCALE;
     
-    //arduboy.drawRect(105, 30, 20, 8, BLACK);
-    //tinyfont.setCursor(105, 30);
-    //tinyfont.print(offset);
-
     //We simply copy the buffer into the screen. That's all
     for(uint8_t x = 0; x < 8; x++)
         FX::readDataBytes(rotbg + offset + x * rotbgWidth, arduboy.sBuffer + x * WIDTH, SCREENWIDTH);
