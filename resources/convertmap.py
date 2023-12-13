@@ -65,20 +65,23 @@ entrance_x = 0
 entrance_y = 0
 
 for i in range(len(tilelayer["data"])):
-    tmap[i] = max(0, tilelayer["data"][i] - tilegid)
-    if tmap[i] == entrancetile:
-        entrance_x = i % width
-        entrance_y = i // width
+    mx = width - 1 - (i % width)    # We have to swap the X coordinates
+    my = i // width
+    mi = tmi(mx, my)
+    tmap[mi] = max(0, tilelayer["data"][i] - tilegid)
+    if tmap[mi] == entrancetile:
+        entrance_x = mx
+        entrance_y = my
 
 print(f"Entrance at {entrance_x}, {entrance_y}")
 
 # Then, we're going to put all the objects in the sprite map. 
-print(f"Reading sprite data")
+print(f'Reading {len(objectlayer["objects"])} sprite data')
 
 for obj in objectlayer["objects"]:
     # Center the location. IDK why it's in the opposite corner compared to the
     # tiles... (see the - then +)
-    x = (obj["x"] + obj["width"] // 2) / tilesize
+    x = width - (obj["x"] + obj["width"] // 2) / tilesize
     y = (obj["y"] - obj["height"] // 2) / tilesize
     id = max(0, obj["gid"] - spritegid)
 
@@ -87,7 +90,7 @@ for obj in objectlayer["objects"]:
     # Compute the map x and y
     mapx = math.floor(x)
     mapy = math.floor(y)
-    mapi = smi(mapx, mapy)
+    mapi = smi(mapx, mapy) # Flip sprites because raycaster engine
 
     # See if there's already something in the sprite map. If so, fail
     assert smap[mapi] == 0, f"Two sprites in the same location: {mapx},{mapy}!"

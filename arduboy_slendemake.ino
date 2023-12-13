@@ -40,13 +40,19 @@ void setup()
     arduboy.setFrameRate(FRAMERATE);
     FX::begin(FX_DATA_PAGE);    // initialise FX chip
 
-    world_x = 30;
-    world_y = 61;
+    raycast.render.spritescaling[0] = 2.0;
+
+    newgame(); //TODO: Get rid of this later!
+}
+
+void newgame()
+{
+    world_x = 33;
+    world_y = 62;
 
     raycast.render.spriteShading = RcShadingType::Black;
     raycast.render.setLightIntensity(NORMALLIGHT);
 
-    raycast.render.spritescaling[0] = 3.0;
     raycast.player.posX = CAGEX + 0.5;
     raycast.player.posY = CAGEY + 0.5;
     raycast.player.dirX = 0;
@@ -283,7 +289,7 @@ void load_sprite(uint8_t x, uint8_t y, uflot local_x, uflot local_y)
     //Try to add a sprite. We figure out the scale and accompanying bounding box based on frame (later)
     RcSprite<NUMINTERNALBYTES> * sp = raycast.sprites.addSprite(
         float(local_x + uflot::fromInternal(buffer[1] & 0x0F)), float(local_y + uflot::fromInternal(buffer[1] / 16)), 
-        buffer[0], 0, -9, NULL);
+        buffer[0], 0, pgm_read_byte(SPRITEOFFSETS + buffer[0]), NULL);
 
     if(sp)
     {
@@ -380,8 +386,6 @@ void loop()
     raycast.runIteration(&arduboy);
 
     //raycast.worldMap.drawMap(&arduboy, 105, 0);
-    //tinyfont.setCursor(0,0);
-    //tinyfont.print(sprintmeter);
 
     FX::display(false);
 }

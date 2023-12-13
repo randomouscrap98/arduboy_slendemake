@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="64" height="64" tilewidth="16" tileheight="16" infinite="0" nextlayerid="3" nextobjectid="28">
- <tileset firstgid="1" source="tiles.tsx"/>
- <tileset firstgid="17" source="spritesheet.tsx"/>
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="64" height="64" tilewidth="16" tileheight="16" infinite="0" nextlayerid="3" nextobjectid="77">
+ <editorsettings>
+  <export format="json"/>
+ </editorsettings>
+ <tileset firstgid="1" source="../../arduboy_collection/arduboy_raycast_fx/resources/tiles.tsx"/>
+ <tileset firstgid="17" source="../../arduboy_collection/arduboy_raycast_fx/resources/spritesheet.tsx"/>
  <layer id="1" name="Tile Layer 1" width="64" height="64">
   <data encoding="csv">
 2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
@@ -71,31 +74,80 @@
 </data>
  </layer>
  <objectgroup id="2" name="Object Layer 1">
-  <object id="2" gid="18" x="424.875" y="989.229" width="32" height="32"/>
-  <object id="3" gid="18" x="521.708" y="988.25" width="32" height="32"/>
-  <object id="4" gid="18" x="541" y="957.5" width="32" height="32"/>
-  <object id="5" gid="18" x="558.5" y="997.5" width="32" height="32"/>
-  <object id="6" gid="18" x="414" y="953" width="32" height="32"/>
-  <object id="7" gid="18" x="387" y="980.5" width="32" height="32"/>
-  <object id="8" gid="18" x="352" y="994.5" width="32" height="32"/>
-  <object id="9" gid="18" x="313" y="990.5" width="32" height="32"/>
-  <object id="10" gid="18" x="353" y="950" width="32" height="32"/>
+  <object id="2" gid="18" x="438.875" y="993.729" width="32" height="32"/>
+  <object id="3" gid="18" x="508.292" y="996.167" width="32" height="32"/>
+  <object id="4" gid="18" x="539" y="962.167" width="32" height="32"/>
+  <object id="5" gid="18" x="563.5" y="992.5" width="32" height="32"/>
+  <object id="6" gid="18" x="416.667" y="955" width="32" height="32"/>
+  <object id="7" gid="18" x="388.667" y="991.333" width="32" height="32"/>
+  <object id="8" gid="18" x="350.667" y="1003.83" width="32" height="32"/>
+  <object id="9" gid="18" x="306.333" y="995.833" width="32" height="32"/>
+  <object id="10" gid="18" x="341" y="932" width="32" height="32"/>
   <object id="11" gid="18" x="381.5" y="936" width="32" height="32"/>
-  <object id="12" gid="18" x="320" y="951.5" width="32" height="32"/>
-  <object id="13" gid="18" x="577.5" y="953" width="32" height="32"/>
-  <object id="14" gid="18" x="462.5" y="851" width="32" height="32"/>
-  <object id="15" gid="18" x="407.5" y="828" width="32" height="32"/>
-  <object id="16" gid="18" x="354" y="763" width="32" height="32"/>
-  <object id="17" gid="18" x="391.5" y="740.5" width="32" height="32"/>
-  <object id="18" gid="18" x="439" y="822.5" width="32" height="32"/>
-  <object id="19" gid="18" x="493.5" y="835.5" width="32" height="32"/>
-  <object id="20" gid="18" x="620" y="927.5" width="32" height="32"/>
-  <object id="21" gid="18" x="537" y="814" width="32" height="32"/>
-  <object id="22" gid="18" x="650" y="894.5" width="32" height="32"/>
-  <object id="23" gid="18" x="649.5" y="939.5" width="32" height="32"/>
-  <object id="24" gid="18" x="616.5" y="964" width="32" height="32"/>
-  <object id="25" gid="18" x="594" y="995.5" width="32" height="32"/>
-  <object id="26" gid="18" x="636" y="1000.5" width="32" height="32"/>
+  <object id="12" gid="18" x="300" y="952.5" width="32" height="32"/>
+  <object id="13" gid="18" x="585.5" y="949" width="32" height="32"/>
+  <object id="14" gid="18" x="470.833" y="885.667" width="32" height="32"/>
+  <object id="15" gid="18" x="396" y="846.5" width="32" height="32"/>
+  <object id="16" gid="18" x="349" y="818.5" width="32" height="32"/>
+  <object id="17" gid="18" x="308" y="844" width="32" height="32"/>
+  <object id="18" gid="18" x="435" y="860.167" width="32" height="32"/>
+  <object id="19" gid="18" x="516.5" y="871.5" width="32" height="32"/>
+  <object id="20" gid="18" x="632" y="930.167" width="32" height="32"/>
+  <object id="21" gid="18" x="555.833" y="863.833" width="32" height="32"/>
+  <object id="22" gid="18" x="709.5" y="999" width="32" height="32"/>
+  <object id="23" gid="18" x="712.333" y="963.5" width="32" height="32"/>
+  <object id="24" gid="18" x="628.5" y="967.5" width="32" height="32"/>
+  <object id="25" gid="18" x="606.5" y="1004" width="32" height="32"/>
+  <object id="26" gid="18" x="654.5" y="1003" width="32" height="32"/>
   <object id="27" gid="18" x="677.5" y="971" width="32" height="32"/>
+  <object id="28" gid="18" x="531" y="821" width="32" height="32"/>
+  <object id="29" gid="18" x="497" y="787.5" width="32" height="32"/>
+  <object id="30" gid="18" x="480" y="829" width="32" height="32"/>
+  <object id="31" gid="18" x="643" y="834" width="32" height="32"/>
+  <object id="32" gid="18" x="623" y="787.5" width="32" height="32"/>
+  <object id="33" gid="18" x="585.5" y="744.5" width="32" height="32"/>
+  <object id="34" gid="18" x="633.5" y="732.5" width="32" height="32"/>
+  <object id="35" gid="18" x="668" y="783" width="32" height="32"/>
+  <object id="36" gid="18" x="685" y="739" width="32" height="32"/>
+  <object id="37" gid="18" x="428" y="795" width="32" height="32"/>
+  <object id="38" gid="18" x="754.667" y="986.667" width="32" height="32"/>
+  <object id="39" gid="18" x="806" y="968" width="32" height="32"/>
+  <object id="40" gid="18" x="885.333" y="956.667" width="32" height="32"/>
+  <object id="41" gid="18" x="848" y="992.667" width="32" height="32"/>
+  <object id="42" gid="18" x="930" y="992.667" width="32" height="32"/>
+  <object id="43" gid="18" x="946" y="946" width="32" height="32"/>
+  <object id="44" gid="18" x="969.333" y="901.333" width="32" height="32"/>
+  <object id="45" gid="18" x="952.667" y="850" width="32" height="32"/>
+  <object id="46" gid="18" x="718" y="773.333" width="32" height="32"/>
+  <object id="47" gid="18" x="376.667" y="771.333" width="32" height="32"/>
+  <object id="48" gid="18" x="322" y="732" width="32" height="32"/>
+  <object id="49" gid="18" x="293" y="684" width="32" height="32"/>
+  <object id="50" gid="18" x="283" y="635" width="32" height="32"/>
+  <object id="51" gid="18" x="296" y="581" width="32" height="32"/>
+  <object id="52" gid="18" x="329" y="534" width="32" height="32"/>
+  <object id="53" gid="18" x="360" y="486" width="32" height="32"/>
+  <object id="54" gid="18" x="409" y="448" width="32" height="32"/>
+  <object id="55" gid="18" x="456" y="436" width="32" height="32"/>
+  <object id="56" gid="18" x="506" y="438" width="32" height="32"/>
+  <object id="57" gid="18" x="556" y="445" width="32" height="32"/>
+  <object id="58" gid="18" x="598" y="436" width="32" height="32"/>
+  <object id="59" gid="18" x="638" y="427" width="32" height="32"/>
+  <object id="60" gid="18" x="678" y="419" width="32" height="32"/>
+  <object id="61" gid="18" x="732" y="428" width="32" height="32"/>
+  <object id="62" gid="18" x="769" y="458" width="32" height="32"/>
+  <object id="63" gid="18" x="798.667" y="503" width="32" height="32"/>
+  <object id="64" gid="18" x="818.333" y="550" width="32" height="32"/>
+  <object id="65" gid="18" x="814.667" y="594" width="32" height="32"/>
+  <object id="66" gid="18" x="792.667" y="636.667" width="32" height="32"/>
+  <object id="67" gid="18" x="773" y="677" width="32" height="32"/>
+  <object id="68" gid="18" x="741" y="708" width="32" height="32"/>
+  <object id="69" gid="18" x="757" y="750" width="32" height="32"/>
+  <object id="70" gid="18" x="738" y="878" width="32" height="32"/>
+  <object id="71" gid="18" x="777" y="843" width="32" height="32"/>
+  <object id="72" gid="18" x="822" y="828" width="32" height="32"/>
+  <object id="73" gid="18" x="964" y="800" width="32" height="32"/>
+  <object id="74" gid="18" x="865" y="797" width="32" height="32"/>
+  <object id="75" gid="18" x="794" y="724" width="32" height="32"/>
+  <object id="76" gid="18" x="960" y="747" width="32" height="32"/>
  </objectgroup>
 </map>

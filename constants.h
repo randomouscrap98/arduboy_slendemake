@@ -16,6 +16,10 @@ constexpr float SPRINTLIGHT = 1.0;
 constexpr uint8_t SCREENWIDTH = 100;
 constexpr float ROTBGSCALE = (rotbgWidth - SCREENWIDTH) / (2 * M_PI);
 
+constexpr int8_t SPRITEOFFSETS[] PROGMEM = {
+    0, -9
+};
+
 // Since we're using this number so many times in template types, might 
 // as well make it a constant.
 constexpr uint8_t NUMINTERNALBYTES = 1;
