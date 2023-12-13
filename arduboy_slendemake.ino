@@ -349,12 +349,17 @@ void setup()
     arduboy.setFrameRate(FRAMERATE);
     FX::begin(FX_DATA_PAGE);    // initialise FX chip
 
+    world_x = 30;
+    world_y = 61;
+
     raycast.render.spriteShading = RcShadingType::Black;
     raycast.render.setLightIntensity(2.5);
 
     raycast.render.spritescaling[0] = 3.0;
     raycast.player.posX = CAGEX + 0.5;
     raycast.player.posY = CAGEY + 0.5;
+    raycast.player.dirX = 0;
+    raycast.player.dirY = -1;
 
     load_region();
 
