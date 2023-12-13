@@ -41,6 +41,9 @@ void setup()
     FX::begin(FX_DATA_PAGE);    // initialise FX chip
 
     raycast.render.spritescaling[0] = 2.0;
+    raycast.render.spritescaling[1] = 1.0;
+    raycast.render.spritescaling[2] = 1.0;
+    raycast.render.spritescaling[3] = 4.0;
 
     newgame(); //TODO: Get rid of this later!
 }
@@ -286,14 +289,29 @@ void load_sprite(uint8_t x, uint8_t y, uflot local_x, uflot local_y)
     //Oops, no sprite here!
     if(!buffer[0]) return;
 
+    struct SpriteMeta meta;
+    memcpy_P(&meta, SPRITEMETAS + buffer[0], sizeof(struct SpriteMeta));
+
     //Try to add a sprite. We figure out the scale and accompanying bounding box based on frame (later)
     RcSprite<NUMINTERNALBYTES> * sp = raycast.sprites.addSprite(
-        float(local_x + uflot::fromInternal(buffer[1] & 0x0F)), float(local_y + uflot::fromInternal(buffer[1] / 16)), 
-        buffer[0], 0, pgm_read_byte(SPRITEOFFSETS + buffer[0]), NULL);
+        float(local_x + muflot::fromInternal(buffer[1] & 0x0F)), float(local_y + muflot::fromInternal(buffer[1] / 16)), 
+        buffer[0], meta.scale, meta.offset, NULL);
 
-    if(sp)
-    {
-        raycast.sprites.addSpriteBounds(sp, 1, true);
+    //if(sp && sp->frame == 3)
+    //{
+    //    tinyfont.setCursor(0,0);
+    //    //char buff[30];
+    //    //sprintf(buff, "%.1f - %.1f", (float)sp->x, (float)sp->y);
+    //    tinyfont.print((float)sp->x, 1);
+    //    tinyfont.print((float)sp->y, 1);
+    //    FX::display(true);
+    //    while(!arduboy.justPressed(A_BUTTON)) {
+    //        arduboy.pollButtons();
+    //    }
+    //}
+
+    if(sp && meta.bounds) {
+        raycast.sprites.addSpriteBounds(sp, meta.bounds, true);
     }
 }
 
@@ -375,6 +393,8 @@ void drawSprintMeter()
 void loop()
 {
     if(!arduboy.nextFrame()) return;
+
+    arduboy.pollButtons();
 
     // Process player movement + interaction
     movement();

@@ -16,9 +16,19 @@ constexpr float SPRINTLIGHT = 1.0;
 constexpr uint8_t SCREENWIDTH = 100;
 constexpr float ROTBGSCALE = (rotbgWidth - SCREENWIDTH) / (2 * M_PI);
 
-constexpr int8_t SPRITEOFFSETS[] PROGMEM = {
-    0, -9
+struct SpriteMeta {
+    int8_t offset;
+    uint8_t scale;
+    float bounds;
 };
+
+constexpr SpriteMeta SPRITEMETAS[] PROGMEM = {
+    { 0, 0, 0 },
+    { -9, 0, 1.0 },
+    { -12, 3, 3.0 },
+    { -3, 1, 0.5 }
+};
+
 
 // Since we're using this number so many times in template types, might 
 // as well make it a constant.
