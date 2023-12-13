@@ -43,7 +43,7 @@ void setup()
     raycast.render.spritescaling[0] = 2.0;
     raycast.render.spritescaling[1] = 1.0;
     raycast.render.spritescaling[2] = 1.0;
-    raycast.render.spritescaling[3] = 4.0;
+    raycast.render.spritescaling[3] = 3.5;
 
     newgame(); //TODO: Get rid of this later!
 }
@@ -51,7 +51,7 @@ void setup()
 void newgame()
 {
     world_x = 33;
-    world_y = 62;
+    world_y = 60;
 
     raycast.render.spriteShading = RcShadingType::Black;
     raycast.render.setLightIntensity(NORMALLIGHT);
@@ -228,8 +228,8 @@ void load_surrounding_sprites()
 void load_sprites(int8_t ofs_x, int8_t ofs_y)
 {
     //local row/column, global row/column
-    uflot lrx, lry;
-    uflot lcx, lcy;
+    uint8_t lrx, lry;
+    uint8_t lcx, lcy;
     uint8_t grx, gry;
     uint8_t gcx, gcy;
     //We ALWAYS do all of a column (ofs_x), but rows will skip the first or last element if both row/column 
@@ -276,7 +276,7 @@ void load_sprites(int8_t ofs_x, int8_t ofs_y)
 }
 
 // Load sprite at the exact location given. Will load nothing if nothing there...
-void load_sprite(uint8_t x, uint8_t y, uflot local_x, uflot local_y)
+void load_sprite(uint8_t x, uint8_t y, uint8_t local_x, uint8_t local_y)
 {
     //Oops, trying to load outside the map.
     if(x >= staticmap_width || y >= staticmap_height || x < 0 || y < 0)
@@ -294,21 +294,8 @@ void load_sprite(uint8_t x, uint8_t y, uflot local_x, uflot local_y)
 
     //Try to add a sprite. We figure out the scale and accompanying bounding box based on frame (later)
     RcSprite<NUMINTERNALBYTES> * sp = raycast.sprites.addSprite(
-        float(local_x + muflot::fromInternal(buffer[1] & 0x0F)), float(local_y + muflot::fromInternal(buffer[1] / 16)), 
+        local_x + muflot::fromInternal(buffer[1] & 0x0F), local_y + muflot::fromInternal(buffer[1] / 16), 
         buffer[0], meta.scale, meta.offset, NULL);
-
-    //if(sp && sp->frame == 3)
-    //{
-    //    tinyfont.setCursor(0,0);
-    //    //char buff[30];
-    //    //sprintf(buff, "%.1f - %.1f", (float)sp->x, (float)sp->y);
-    //    tinyfont.print((float)sp->x, 1);
-    //    tinyfont.print((float)sp->y, 1);
-    //    FX::display(true);
-    //    while(!arduboy.justPressed(A_BUTTON)) {
-    //        arduboy.pollButtons();
-    //    }
-    //}
 
     if(sp && meta.bounds) {
         raycast.sprites.addSpriteBounds(sp, meta.bounds, true);
@@ -368,12 +355,12 @@ void drawSidebar()
     arduboy.drawFastVLine(raycast.render.VIEWWIDTH + 1, 0, HEIGHT, WHITE);
     constexpr uint8_t PAGEWIDTH = 6;
     constexpr uint8_t PAGEHEIGHT = 8;
-    constexpr uint8_t PAGESPACE = 4;
+    constexpr uint8_t PAGESPACE = 3;
 
     for(uint8_t i = 0; i < 8; i++)
     {
-        uint8_t x = raycast.render.VIEWWIDTH + 6 + (PAGESPACE + PAGEWIDTH) * (i & 1);
-        uint8_t y = 6 + (PAGEHEIGHT + PAGESPACE) * (i / 2);
+        uint8_t x = raycast.render.VIEWWIDTH + 7 + (PAGESPACE + PAGEWIDTH) * (i & 1);
+        uint8_t y = 7 + (PAGEHEIGHT + PAGESPACE) * (i / 2);
 
         if(page_bitflag & (1 << i)) {
             arduboy.fillRect(x, y, PAGEWIDTH, PAGEHEIGHT, WHITE);

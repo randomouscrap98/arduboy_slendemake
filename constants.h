@@ -25,7 +25,7 @@ struct SpriteMeta {
 constexpr SpriteMeta SPRITEMETAS[] PROGMEM = {
     { 0, 0, 0 },
     { -9, 0, 1.0 },
-    { -12, 3, 3.0 },
+    { -12, 3, 2.5 },
     { -3, 1, 0.5 }
 };
 
