@@ -5,5 +5,6 @@ pip install -r requirements.txt
 
 python convertmap.py
 python convertimages.py
+python convertfx.py
 
-pause
+echo "ALL COMPLETE!"
