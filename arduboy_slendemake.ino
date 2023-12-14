@@ -51,7 +51,7 @@ void setup()
 
     raycast.render.spritescaling[0] = 2.0;
     raycast.render.spritescaling[1] = 1.0;
-    raycast.render.spritescaling[2] = 1.0;
+    raycast.render.spritescaling[2] = 0.70;
     raycast.render.spritescaling[3] = 3.5;
 
     newgame(); //TODO: Get rid of this later!
@@ -60,7 +60,7 @@ void setup()
 void newgame()
 {
     state = GameState::Gameplay;
-    current_pageview = 1;
+    current_pageview = 0;
 
     world_x = 33;
     world_y = 60;
@@ -161,11 +161,8 @@ void waitPageDismiss()
     if(arduboy.justPressed(A_BUTTON))
     {
         page_bitflag |= (1 << (current_pageview - 1));
-        current_pageview = current_pageview + 1; //0;
+        current_pageview = 0;
 
-        if(current_pageview > 8)
-            current_pageview = 0;
-        
         drawSidebar();
 
         //TODO: Check if page_bitflag is 255, finish game if so. Will they be simple timers?
