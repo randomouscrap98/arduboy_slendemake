@@ -3,3 +3,6 @@ build/
 ardens/
 imgui.ini
 *.exe
+
+.venv/
+__pycache__/
