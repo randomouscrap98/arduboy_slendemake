@@ -18,6 +18,14 @@
 
 // ARDUBOY_NO_USB
 
+enum GameState
+{
+    Menu,
+    Gameplay
+};
+
+GameState state; 
+
 Arduboy2Base arduboy;
 Tinyfont tinyfont = Tinyfont(arduboy.sBuffer, Arduboy2::width(), Arduboy2::height());
 
@@ -25,6 +33,7 @@ uint8_t world_x = 3;
 uint8_t world_y = 3;
 
 uint8_t page_bitflag = 0;
+uint8_t current_pageview = 0;  //Starts at 1, but pages are really 0 indexed
 int16_t sprintmeter = SPRINTMAX;
 bool holding_b = false;
 
@@ -50,6 +59,9 @@ void setup()
 
 void newgame()
 {
+    state = GameState::Gameplay;
+    current_pageview = 1;
+
     world_x = 33;
     world_y = 60;
 
@@ -144,6 +156,21 @@ void movement()
     }
 }
 
+void waitPageDismiss()
+{
+    if(arduboy.justPressed(A_BUTTON))
+    {
+        page_bitflag |= (1 << (current_pageview - 1));
+        current_pageview = current_pageview + 1; //0;
+
+        if(current_pageview > 8)
+            current_pageview = 0;
+        
+        drawSidebar();
+
+        //TODO: Check if page_bitflag is 255, finish game if so. Will they be simple timers?
+    }
+}
 //Menu functionality, move the cursor, select things (redraws automatically)
 /*void doMenu()
 {
@@ -371,6 +398,11 @@ void drawSidebar()
     }
 }
 
+void drawPage(uint8_t page)
+{
+    FX::drawBitmap(26, 0, pages, page, dbmNormal);
+}
+
 void drawSprintMeter()
 {
     arduboy.drawFastHLine(raycast.render.VIEWWIDTH + 7, HEIGHT - 4, 15, BLACK);
@@ -383,16 +415,29 @@ void loop()
 
     arduboy.pollButtons();
 
-    // Process player movement + interaction
-    movement();
+    if(state == GameState::Menu)
+    {
 
-    // Draw the correct background for the area. 
-    drawRotBg();
-    drawSprintMeter();
+    }
+    else
+    {
+        // Process player movement + interaction
+        if(current_pageview)
+            waitPageDismiss();
+        else
+            movement();
 
-    raycast.runIteration(&arduboy);
+        // Draw the correct background for the area.
+        drawRotBg();
+        drawSprintMeter();
 
-    //raycast.worldMap.drawMap(&arduboy, 105, 0);
+        raycast.runIteration(&arduboy);
+
+        if(current_pageview)
+            drawPage(current_pageview - 1);
+
+        //raycast.worldMap.drawMap(&arduboy, 105, 0);
+    }
 
     FX::display(false);
 }

@@ -127,6 +127,7 @@ with open(outfile, "w") as f:
     f.write("}\n\n")
 
     f.write('image_t rotbg = "../resources/rotbg.png"\n\n')
+    f.write('image_t pages = "../resources/pages_48x64.png"\n\n')
 
 
 print("Done!")

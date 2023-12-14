@@ -6,12 +6,17 @@ using uint24_t = __uint24;
 
 // Initialize FX hardware using  FX::begin(FX_DATA_PAGE); in the setup() function.
 
-constexpr uint16_t FX_DATA_PAGE  = 0xffc0;
-constexpr uint24_t FX_DATA_BYTES = 16292;
+constexpr uint16_t FX_DATA_PAGE  = 0xffb4;
+constexpr uint24_t FX_DATA_BYTES = 19368;
 
 constexpr uint24_t staticmap_fx = 0x000000;
 constexpr uint24_t staticsprites_fx = 0x001000;
 constexpr uint24_t rotbg = 0x003000;
 constexpr uint16_t rotbgWidth  = 500;
 constexpr uint16_t rotbgHeight = 64;
+
+constexpr uint24_t pages = 0x003FA4;
+constexpr uint16_t pagesWidth  = 48;
+constexpr uint16_t pagesHeight = 64;
+constexpr uint8_t  pagesFrames = 8;
 

@@ -135,3 +135,5 @@ uint8_t staticsprites_fx[] = {
 
 image_t rotbg = "../resources/rotbg.png"
 
+image_t pages = "../resources/pages_48x64.png"
+
