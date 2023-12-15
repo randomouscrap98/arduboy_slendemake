@@ -7,6 +7,8 @@ mapfile = os.path.join("..", "resources", "map.json")
 outfile = os.path.join("..", "fx", "fxdata.txt")
 entrancetile = 2
 tilesize = 16
+spriteview = 13
+spritemax = 30
 
 print(f"Loading map file {mapfile}")
 
@@ -100,6 +102,19 @@ for obj in objectlayer["objects"]:
     smap[mapi] = id
     smap[mapi + 1] = math.floor(16 * (x - mapx)) + (math.floor(16 * (y - mapy)) << 4)
     assert smap[mapi + 1] < 256, f"Invalid smap float position at {x},{y}!"
+
+
+# Find any locations that have too many sprites
+for xo in range(width - spriteview):
+    for yo in range(height - spriteview):
+        spritetotal = 0
+        for x in range(spriteview):
+            for y in range(spriteview):
+                if smap[smi(xo + x, yo + y)]:
+                    spritetotal += 1
+        assert spritetotal <= spritemax, f"Too many sprites in quadrant {xo}, {yo}"
+
+
 
 print(f"Dumping to {outfile}")
 
