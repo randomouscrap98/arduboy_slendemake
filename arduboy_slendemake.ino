@@ -16,7 +16,9 @@
 #include "tilesheet.h"
 #include "constants.h"
 
-// ARDUBOY_NO_USB
+#define DEBUGPAGES
+
+//ARDUBOY_NO_USB
 
 enum GameState
 {
@@ -36,6 +38,7 @@ uint8_t page_bitflag = 0;
 uint8_t current_pageview = 0;  //Starts at 1, but pages are really 0 indexed
 int16_t sprintmeter = SPRINTMAX;
 bool holding_b = false;
+uint8_t pagelocs[16] = {255};
 
 RcContainer<NUMSPRITES, NUMINTERNALBYTES, SCREENWIDTH, HEIGHT> raycast(tilesheet, spritesheet, spritesheet_Mask);
 
@@ -73,10 +76,25 @@ void newgame()
     raycast.player.dirX = 0;
     raycast.player.dirY = -1;
 
+    spawnPages();
+
     load_region();
     load_surrounding_sprites();
 
     drawSidebar();
+}
+
+void spawnPages()
+{
+    #ifdef DEBUGPAGES
+    //Put all the pages right in a row in front of the player
+    for(uint8_t i = 0; i < 16; i += 2)
+    {
+        pagelocs[i] = world_x - 4 + i / 2;
+        pagelocs[i + 1] = world_y - 2;
+    }
+    #else
+    #endif
 }
 
 bool isSolid(uflot x, uflot y)
@@ -132,6 +150,8 @@ void movement()
 
     raycast.player.tryMovement(movement, rotation, &isSolid);
 
+    checkPagePickup();
+
     bool reload = false;
 
     int8_t ofs_x = ((flot)raycast.player.posX - CAGEX).getInteger();
@@ -156,6 +176,23 @@ void movement()
     }
 }
 
+void checkPagePickup()
+{
+    RcBounds * colliding_page = raycast.sprites.firstColliding(raycast.player.posX, raycast.player.posY, PAGEMASK);
+
+    if(colliding_page)
+    {
+        RcSprite<NUMINTERNALBYTES> * page_sprite = raycast.sprites.getLinkedSprite(colliding_page);
+
+        if(page_sprite)
+        {
+            current_pageview = page_sprite->intstate[0] + 1;
+            memset(pagelocs + (current_pageview - 1) * 2, 0xFF, 2); //Don't let it show up again
+            raycast.sprites.deleteLinked(page_sprite); //Immediately despawn the page
+        }
+    }
+}
+
 void waitPageDismiss()
 {
     if(arduboy.justPressed(A_BUTTON))
@@ -168,35 +205,11 @@ void waitPageDismiss()
         //TODO: Check if page_bitflag is 255, finish game if so. Will they be simple timers?
     }
 }
-//Menu functionality, move the cursor, select things (redraws automatically)
-/*void doMenu()
+
+void behavior_page(RcSprite<NUMINTERNALBYTES> * sprite)
 {
-    constexpr uint8_t MENUITEMS = 3;
-    int8_t menuMod = 0;
-    int8_t selectMod = 0;
-
-    if(arduboy.pressed(A_BUTTON) && arduboy.justPressed(UP_BUTTON))
-        menuMod = -1;
-    if(arduboy.pressed(A_BUTTON) && arduboy.justPressed(DOWN_BUTTON))
-        menuMod = 1;
-
-    menumod(menuIndex, menuMod, MENUITEMS);
-
-    if(arduboy.justPressed(B_BUTTON))
-    {
-        selectMod = 1;
-        switch (menuIndex)
-        {
-            case 0: menumod(mazeSize, selectMod, MAZESIZECOUNT); break;
-            case 1: menumod(mazeType, selectMod, MAZETYPECOUNT); break;
-            case 2: generateMaze(); break;
-        }
-    }
-
-    // We check released in case the user was showing a hint
-    if(menuMod || selectMod || arduboy.pressed(B_BUTTON) || arduboy.justReleased(B_BUTTON))
-        drawMenu(arduboy.pressed(B_BUTTON) && menuIndex == 3);
-}*/
+    sprite->setHeight(4 * sin(arduboy.frameCount / 6.0));
+}
 
 /*
 void behavior_animate_16(RcSprite<2> * sprite) {
@@ -305,6 +318,13 @@ void load_sprite(uint8_t x, uint8_t y, uint8_t local_x, uint8_t local_y)
     //Oops, trying to load outside the map.
     if(x >= staticmap_width || y >= staticmap_height || x < 0 || y < 0)
         return;
+    
+    //Load pages if they exist. This could become a performance issue?
+    for(uint8_t i = 0; i < 16; i += 2)
+    {
+        if(x == pagelocs[i] && y == pagelocs[i + 1])
+            load_pagesprite(local_x, local_y, i >> 1);
+    }
 
     uint8_t buffer[staticsprites_bytes];
 
@@ -322,8 +342,25 @@ void load_sprite(uint8_t x, uint8_t y, uint8_t local_x, uint8_t local_y)
         buffer[0], meta.scale, meta.offset, NULL);
 
     if(sp && meta.bounds) {
-        raycast.sprites.addSpriteBounds(sp, meta.bounds, true);
+        raycast.sprites.addSpriteBounds(sp, meta.bounds, meta.solid);
     }
+}
+
+void load_pagesprite(uint8_t local_x, uint8_t local_y, uint8_t page)
+{
+    // Load the page
+    RcSprite<NUMINTERNALBYTES> *sp = raycast.sprites.addSprite(
+        local_x + 0.5, local_y + 0.5,
+        PAGESPRITE, PAGESCALE, 0, behavior_page);
+
+    if (!sp)
+    {
+        // Need to panic or something
+    }
+
+    sp->intstate[0] = page;
+    RcBounds * bounds = raycast.sprites.addSpriteBounds(sp, 0.75, false);
+    bounds->state |= PAGEMASK; // Top bit
 }
 
 // Reload the map for the local region. We'll see if this is too slow...
