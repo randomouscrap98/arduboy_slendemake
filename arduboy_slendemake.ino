@@ -1,6 +1,7 @@
 #include <Tinyfont.h>
 #include <FixedPoints.h>
 #include <Arduboy2.h>
+#include <ArduboyTones.h>
 
 #include <ArduboyFX.h>      // required to access the FX external flash
 #include "fx/fxdata.h"  // this file contains all references to FX data
@@ -10,25 +11,33 @@
 // Libs for raycasting
 #include <ArduboyRaycast.h>
 
+// Some debug junk
+#define DEBUGPAGES
+//#define DEBUGMOVEMENT
+//#define VARIABLEFPS
+#define SKIPINTRO
+
 // Graphics
 #include "resources/raycastbg.h"
 #include "spritesheet.h"
 #include "tilesheet.h"
 #include "constants.h"
-
-#define DEBUGPAGES
+#include "sounds.h"
 
 //ARDUBOY_NO_USB
+
 
 enum GameState
 {
     Menu,
+    Intro,
     Gameplay
 };
 
 GameState state; 
 
 Arduboy2Base arduboy;
+ArduboyTones sound(arduboy.audio.enabled);
 Tinyfont tinyfont = Tinyfont(arduboy.sBuffer, Arduboy2::width(), Arduboy2::height());
 
 uint8_t world_x = 3;
@@ -39,6 +48,7 @@ uint8_t current_pageview = 0;  //Starts at 1, but pages are really 0 indexed
 int16_t sprintmeter = SPRINTMAX;
 bool holding_b = false;
 uint8_t pagelocs[16] = {255};
+UFixed<0,8> moveaccum = 0;
 
 RcContainer<NUMSPRITES, NUMINTERNALBYTES, SCREENWIDTH, HEIGHT> raycast(tilesheet, spritesheet, spritesheet_Mask);
 
@@ -57,7 +67,12 @@ void setup()
     raycast.render.spritescaling[2] = 0.70;
     raycast.render.spritescaling[3] = 3.5;
 
-    newgame(); //TODO: Get rid of this later!
+    #ifdef SKIPINTRO
+    arduboy.audio.on();
+    newgame();
+    #else
+    state = GameState::Menu;
+    #endif
 }
 
 void newgame()
@@ -148,6 +163,14 @@ void movement()
         holding_b = false;
     }
 
+    moveaccum += abs(movement);
+
+    if(moveaccum > WALKSOUNDTRIGGER)
+    {
+        moveaccum = 0;
+        sound.tones(crunches + (rand() % CRUNCHES) * CRUNCHLEN);
+    }
+
     raycast.player.tryMovement(movement, rotation, &isSolid);
 
     checkPagePickup();
@@ -186,6 +209,7 @@ void checkPagePickup()
 
         if(page_sprite)
         {
+            sound.tones(pagepickup);
             current_pageview = page_sprite->intstate[0] + 1;
             memset(pagelocs + (current_pageview - 1) * 2, 0xFF, 2); //Don't let it show up again
             raycast.sprites.deleteLinked(page_sprite); //Immediately despawn the page
@@ -443,6 +467,31 @@ void drawSprintMeter()
     arduboy.drawFastHLine(raycast.render.VIEWWIDTH + 7, HEIGHT - 4, 15 * sprintmeter / SPRINTMAX, WHITE);
 }
 
+void doMenu()
+{
+    if(arduboy.justPressed(LEFT_BUTTON) || arduboy.justPressed(RIGHT_BUTTON))
+        arduboy.audio.toggle();
+    
+    bool audio = arduboy.audio.enabled();
+    constexpr uint8_t x1 = 21;
+    constexpr uint8_t x2 = 74;
+    constexpr uint8_t y = 16;
+    constexpr uint8_t pad = 2;
+
+    arduboy.fillRect(x1 - pad, y - pad, 32 + 2 * pad, 32 + 2 * pad, audio ? WHITE : BLACK);
+    arduboy.fillRect(x2 - pad, y - pad, 32 + 2 * pad, 32 + 2 * pad, audio ? BLACK : WHITE);
+
+    FX::drawBitmap(x1, y, soundgraphic, 0, dbmInvert); 
+    FX::drawBitmap(x2, y, soundgraphic, 1, dbmInvert); 
+
+    if(arduboy.justPressed(A_BUTTON))
+    {
+        arduboy.audio.saveOnOff();
+        newgame(); //TODO: Get rid of this later!
+    }
+}
+
+
 void loop()
 {
     if(!arduboy.nextFrame()) return;
@@ -451,7 +500,7 @@ void loop()
 
     if(state == GameState::Menu)
     {
-
+        doMenu();
     }
     else
     {

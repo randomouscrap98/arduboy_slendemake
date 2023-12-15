@@ -139,3 +139,5 @@ image_t rotbg_day = "../resources/rotbg_day.png"
 
 image_t pages = "../resources/pages_48x64.png"
 
+image_t soundgraphic = "../resources/sound_32x32.png"
+

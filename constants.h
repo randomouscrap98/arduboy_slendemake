@@ -4,9 +4,20 @@ constexpr uint8_t staticmap_width = 64;
 constexpr uint8_t staticmap_height = 64;
 constexpr uint8_t staticsprites_bytes = 2;
 
+#ifdef VARIABLEFPS
+constexpr uint8_t FRAMERATE = 35; //Too much overdraw?
+#else
 constexpr uint8_t FRAMERATE = 25; //Too much overdraw?
+#endif
+
+#ifdef DEBUGMOVEMENT
+constexpr float MOVESPEED = 3.25f / FRAMERATE;
+constexpr float ROTSPEED = 3.5f / FRAMERATE;
+#else
 constexpr float MOVESPEED = 1.25f / FRAMERATE;
 constexpr float ROTSPEED = 1.5f / FRAMERATE;
+#endif
+
 constexpr float MOVEMULTIPLIER = 2.25;
 constexpr float ROTMULTIPLIER = 2.25;
 
@@ -69,4 +80,6 @@ constexpr int16_t SPRINTMAX = FRAMERATE * SPRINTMIN_SECS * SPRINT_SECS * SPRINTR
 constexpr int16_t SPRINTMIN = SPRINTMAX / (FRAMERATE * SPRINTMIN_SECS); //If you let go of sprint, you won't be able to sprint again until there's this much sprint available
 constexpr int16_t SPRINTDRAIN = SPRINTMAX / (FRAMERATE * SPRINT_SECS); 
 constexpr int16_t SPRINTRECOVER = SPRINTMAX / (FRAMERATE * SPRINTREC_SECS); 
+
+constexpr UFixed<0,8> WALKSOUNDTRIGGER = 0.8;
 //constexpr uint8_t SPRITEGC_PERFRAME = 3;  // How many sprites to loop through per frame for garbage collect
