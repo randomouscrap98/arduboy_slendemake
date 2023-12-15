@@ -112,7 +112,7 @@ for xo in range(width - spriteview):
             for y in range(spriteview):
                 if smap[smi(xo + x, yo + y)]:
                     spritetotal += 1
-        assert spritetotal <= spritemax, f"Too many sprites in quadrant {xo}, {yo}"
+        assert spritetotal <= spritemax, f"Too many sprites in quadrant {xo}, {yo}: {spritetotal}"
 
 
 
