@@ -5,8 +5,8 @@ constexpr uint8_t staticmap_height = 64;
 constexpr uint8_t staticsprites_bytes = 2;
 
 constexpr uint8_t FRAMERATE = 25; //Too much overdraw?
-constexpr float MOVESPEED = 1.25f / FRAMERATE;
-constexpr float ROTSPEED = 1.5f / FRAMERATE;
+constexpr float MOVESPEED = 3.25f / FRAMERATE;
+constexpr float ROTSPEED = 3.5f / FRAMERATE;
 constexpr float MOVEMULTIPLIER = 2.25;
 constexpr float ROTMULTIPLIER = 2.25;
 
