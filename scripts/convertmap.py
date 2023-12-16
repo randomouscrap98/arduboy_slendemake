@@ -6,6 +6,7 @@ sbytes = 2
 mapfile = os.path.join("..", "resources", "map.json")
 outfile = os.path.join("..", "fx", "fxdata.txt")
 entrancetile = 2
+pagesprite = 10
 tilesize = 16
 spriteview = 13
 spritemax = 30
@@ -49,6 +50,10 @@ height = tilelayer["height"]
 # The values we'll be writing to
 tmap = [0] * width * height
 smap = [0] * width * height * sbytes
+pages = [] # This will become a different structure later
+
+for i in range(20):
+    pages.append([])
 
 def tmi(x, y):
     """ tile map index """
@@ -83,7 +88,7 @@ print(f'Reading {len(objectlayer["objects"])} sprite data')
 for obj in objectlayer["objects"]:
     # Center the location. IDK why it's in the opposite corner compared to the
     # tiles... (see the - then +)
-    x = width - (obj["x"] + obj["width"] // 2) / tilesize
+    x = width - (obj["x"] + obj["width"] // 2) / tilesize   # Flip sprites because raycaster engine
     y = (obj["y"] - min(obj["height"] // 2, 16)) / tilesize
     # y = (obj["y"]) / tilesize
     id = max(0, obj["gid"] - spritegid)
@@ -93,7 +98,14 @@ for obj in objectlayer["objects"]:
     # Compute the map x and y
     mapx = math.floor(x)
     mapy = math.floor(y)
-    mapi = smi(mapx, mapy) # Flip sprites because raycaster engine
+    mapi = smi(mapx, mapy)
+
+    # If this is a page sprite, we add it to a special thingy
+    if id == pagesprite:
+        locationid = int(obj["name"]) # Throws an exception if bad, which is good
+        pages[locationid].append(mapx)
+        pages[locationid].append(mapy)
+        continue
 
     # See if there's already something in the sprite map. If so, fail
     assert smap[mapi] == 0, f"Two sprites in the same location: {mapx},{mapy}!"
@@ -139,6 +151,29 @@ with open(outfile, "w") as f:
                 f.write(f"{m},")
             f.write(" ")
         f.write("\n")
+    f.write("}\n\n")
+
+    print(json.dumps(pages))
+
+    pageindexes = []
+    totalraw = 0
+    f.write("uint8_t pagelocs_raw[] = {\n")
+    for pi in range(len(pages)):
+        if not len(pages[pi]):
+            continue
+        pageindexes.append(totalraw)
+        totalraw += 1
+        # Write the length of the section first
+        f.write(f"{len(pages[pi]) // 2}, ")
+        for v in pages[pi]:
+            totalraw += 1
+            f.write(f"{v},")
+        f.write("\n")
+    f.write("}\n\n")
+
+    f.write("uint8_t pagelocs_offsets[] = {\n")
+    for pi in pageindexes:
+        f.write(f"{pi},")
     f.write("}\n\n")
 
     f.write('image_t rotbg = "../resources/rotbg.png"\n\n')

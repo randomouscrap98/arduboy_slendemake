@@ -13,8 +13,8 @@
 #include <ArduboyRaycast_Shading.h>
 
 // Some debug junk
-#define DEBUGPAGES
-//#define DEBUGMOVEMENT
+//#define DEBUGPAGES
+#define DEBUGMOVEMENT
 #define SKIPINTRO
 //#define DRAWMAP
 //#define VARIABLEFPS
@@ -120,6 +120,24 @@ void spawnPages()
         pagelocs[i + 1] = world_y - 2;
     }
     #else
+    uint8_t usedlocs[8];
+    for(uint8_t i = 0; i < 8; i++)
+    {
+        //Try to pick a location that hasn't been used yet. This is the wasteful part
+spawnPagesRetry:
+        usedlocs[i] = rand() % NUMLOCATIONS;
+        for(uint8_t j = 0; j < i; j++)
+        {
+            if(usedlocs[j] == usedlocs[i])
+                goto spawnPagesRetry;
+        }
+
+        uint8_t offset = FX::readIndexedUInt8(pagelocs_offsets, usedlocs[i]);
+        uint8_t numpagelocs = FX::readIndexedUInt8(pagelocs_raw, offset);
+        
+        //Now pick some random location and load it into the page location table
+        FX::readDataBytes(pagelocs_raw + offset + 1 + ((rand() % numpagelocs) << 1), pagelocs + (i << 1), 2);
+    }
     #endif
 }
 
@@ -386,7 +404,7 @@ void load_sprite(uint8_t x, uint8_t y, uint8_t local_x, uint8_t local_y)
         local_x + muflot::fromInternal(buffer[1] & 0x0F), local_y + muflot::fromInternal(buffer[1] / 16), 
         buffer[0], meta.scale, meta.offset, NULL);
 
-    if(sp && meta.bounds) {
+    if(sp && meta.bounds != 0) {
         raycast.sprites.addSpriteBounds(sp, meta.bounds, meta.solid);
     }
 }
