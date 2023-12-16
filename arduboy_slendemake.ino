@@ -16,6 +16,7 @@
 #define DEBUGPAGES
 //#define DEBUGMOVEMENT
 #define SKIPINTRO
+//#define DRAWMAP
 //#define VARIABLEFPS
 
 // Graphics / resources
@@ -599,7 +600,7 @@ void doEscape()
     }
     else if(arduboy.frameCount > timer1)
     {
-        tinyfont.setCursor(40, 30);
+        tinyfont.setCursor(38, 30);
         tinyfont.setTextColor(BLACK);
         tinyfont.print(F("YOU ESCAPED"));
     }
@@ -641,17 +642,22 @@ void loop()
         if(current_pageview)
             drawPage(current_pageview - 1);
 
-        //raycast.worldMap.drawMap(&arduboy, 105, 0);
+        #ifdef DRAWMAP
+        raycast.worldMap.drawMap(&arduboy, 105, 0);
+        #endif
+
         if(page_bitflag == 255)
         {
             timer1++;
             constexpr uint16_t initialfade = FRAMERATE * 6;
-            constexpr uint16_t secondaryfade = FRAMERATE * 5 + initialfade;
+            constexpr uint16_t secondaryfade = FRAMERATE * 10 + initialfade;
             constexpr uint16_t finalcut = secondaryfade + FRAMERATE * 2.5f;
 
             if(timer1 < initialfade)
             {
                 shadeScreen<BLACK>(&arduboy, min(1.0f, timer1 / (FRAMERATE * 4.5f)), 0, 0, WIDTH, HEIGHT);
+                if(timer1 > FRAMERATE * 4.5)
+                    moveaccum = 0; //Disable sound? kind of a hack
             }
             else if(timer1 == initialfade)
             {
