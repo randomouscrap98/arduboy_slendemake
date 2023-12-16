@@ -15,8 +15,8 @@
 // Some debug junk
 #define DEBUGPAGES
 //#define DEBUGMOVEMENT
+#define SKIPINTRO
 //#define VARIABLEFPS
-//#define SKIPINTRO
 
 // Graphics / resources
 #include "spritesheet.h"
@@ -33,7 +33,8 @@ enum GameState
 {
     Menu,
     Intro,
-    Gameplay
+    Gameplay,
+    Escape
 };
 
 GameState state; 
@@ -52,6 +53,7 @@ bool holding_b = false;
 uint8_t pagelocs[16] = {255};
 UFixed<0,8> moveaccum = 0;
 uint16_t timer1 = 0;
+uint16_t current_bg = rotbg;
 
 RcContainer<NUMSPRITES, NUMINTERNALBYTES, SCREENWIDTH, HEIGHT> raycast(tilesheet, spritesheet, spritesheet_Mask);
 
@@ -63,6 +65,7 @@ void setup()
     arduboy.flashlight();
     arduboy.initRandomSeed();
     arduboy.setFrameRate(FRAMERATE);
+    arduboy.initRandomSeed();
     FX::begin(FX_DATA_PAGE);    // initialise FX chip
 
     raycast.render.spritescaling[0] = 2.0;
@@ -82,11 +85,14 @@ void newgame()
 {
     state = GameState::Gameplay;
     current_pageview = 0;
+    current_bg = rotbg;
     timer1 = 0;
 
     world_x = 33;
     world_y = 60;
 
+    raycast.render.altWallShading = RcShadingType::Black;
+    raycast.render.shading = RcShadingType::Black;
     raycast.render.spriteShading = RcShadingType::Black;
     raycast.render.setLightIntensity(NORMALLIGHT);
 
@@ -165,6 +171,11 @@ void movement()
     {
         sprintmeter = min(sprintmeter + SPRINTRECOVER, SPRINTMAX);
         holding_b = false;
+    }
+
+    if(arduboy.justPressed(A_BUTTON))
+    {
+        sound.tones(drone);
     }
 
     walkingSound(movement);
@@ -440,7 +451,7 @@ void drawRotBg()
     
     //We simply copy the buffer into the screen. That's all
     for(uint8_t x = 0; x < 8; x++)
-        FX::readDataBytes(rotbg + offset + x * rotbgWidth, arduboy.sBuffer + x * WIDTH, SCREENWIDTH);
+        FX::readDataBytes(current_bg + offset + x * rotbgWidth, arduboy.sBuffer + x * WIDTH, SCREENWIDTH);
 }
 
 void drawSidebar()
@@ -524,7 +535,7 @@ void doIntro()
     constexpr uint16_t text1black = FRAMERATE * 1.5;
     constexpr uint16_t text1show = FRAMERATE * 1.5;
     constexpr uint16_t text2show = FRAMERATE * 2.5;
-    constexpr uint16_t text2black = FRAMERATE * 1.5;
+    constexpr uint16_t text2black = FRAMERATE * 3.5;
 
     constexpr uint16_t text1end = text1black + text1show + STDFADE * 2;
     constexpr uint16_t text2end = text1end + text2show + STDFADE * 2 + text2black;
@@ -562,12 +573,36 @@ void doIntro()
     else
     {
         newgame();
+        return;
     }
 
-    constexpr uint16_t walkend = text2fadef;
+    constexpr uint16_t walkend = text2fadef + STDFADE / 1.5;
 
     if(introt < walkend)
+    {
         walkingSound(MOVESPEED);
+    }
+    else if(introt > walkend + FRAMERATE / 2 && current_pageview == 1)
+    {
+        current_pageview = 2;
+        sound.tones(climbfence);
+    }
+}
+
+void doEscape()
+{
+    // So for "style", I guess I might leave it stuck in the escape text
+    if(current_pageview == 0)
+    {
+        timer1 = arduboy.frameCount + FRAMERATE * 1;
+        current_pageview = 1;
+    }
+    else if(arduboy.frameCount > timer1)
+    {
+        tinyfont.setCursor(40, 30);
+        tinyfont.setTextColor(BLACK);
+        tinyfont.print(F("YOU ESCAPED"));
+    }
 }
 
 
@@ -584,6 +619,10 @@ void loop()
     else if(state == GameState::Intro)
     {
         doIntro();
+    }
+    else if(state == GameState::Escape)
+    {
+        doEscape();
     }
     else
     {
@@ -603,6 +642,37 @@ void loop()
             drawPage(current_pageview - 1);
 
         //raycast.worldMap.drawMap(&arduboy, 105, 0);
+        if(page_bitflag == 255)
+        {
+            timer1++;
+            constexpr uint16_t initialfade = FRAMERATE * 6;
+            constexpr uint16_t secondaryfade = FRAMERATE * 5 + initialfade;
+            constexpr uint16_t finalcut = secondaryfade + FRAMERATE * 2.5f;
+
+            if(timer1 < initialfade)
+            {
+                shadeScreen<BLACK>(&arduboy, min(1.0f, timer1 / (FRAMERATE * 4.5f)), 0, 0, WIDTH, HEIGHT);
+            }
+            else if(timer1 == initialfade)
+            {
+                raycast.render.altWallShading = RcShadingType::White;
+                raycast.render.shading = RcShadingType::White;
+                raycast.render.spriteShading = RcShadingType::White;
+                raycast.render.setLightIntensity(DAYLIGHT);
+                current_bg = rotbg_day;
+            }
+            else if(timer1 > secondaryfade)
+            {
+                shadeScreen<WHITE>(&arduboy, min(1.0f, (timer1 - secondaryfade) / (FRAMERATE * 2.5f)), 0, 0, WIDTH, HEIGHT);
+
+                if(timer1 == finalcut)
+                {
+                    state = GameState::Escape;
+                    timer1 = 0;
+                    current_pageview = 0;
+                }
+            }
+        }
     }
 
     FX::display(false);

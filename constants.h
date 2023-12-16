@@ -21,6 +21,7 @@ constexpr float ROTSPEED = 1.5f / FRAMERATE;
 constexpr float MOVEMULTIPLIER = 2.25;
 constexpr float ROTMULTIPLIER = 2.25;
 
+constexpr float DAYLIGHT = 6.5;
 constexpr float NORMALLIGHT = 2.5;
 constexpr float SPRINTLIGHT = 1.0;
 
