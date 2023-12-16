@@ -26,6 +26,7 @@ constexpr float SPRINTLIGHT = 1.0;
 
 constexpr uint8_t SCREENWIDTH = 100;
 constexpr float ROTBGSCALE = (rotbgWidth - SCREENWIDTH) / (2 * M_PI);
+constexpr uint8_t STDFADE = FRAMERATE; // / 2;
 
 constexpr uint8_t PAGESPRITE = 10;
 constexpr uint8_t PAGESCALE = 2;

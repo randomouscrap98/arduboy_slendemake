@@ -10,19 +10,21 @@
 
 // Libs for raycasting
 #include <ArduboyRaycast.h>
+#include <ArduboyRaycast_Shading.h>
 
 // Some debug junk
 #define DEBUGPAGES
 //#define DEBUGMOVEMENT
 //#define VARIABLEFPS
-#define SKIPINTRO
+//#define SKIPINTRO
 
-// Graphics
-#include "resources/raycastbg.h"
+// Graphics / resources
 #include "spritesheet.h"
 #include "tilesheet.h"
-#include "constants.h"
 #include "sounds.h"
+
+#include "constants.h"
+#include "utils.h"
 
 //ARDUBOY_NO_USB
 
@@ -49,6 +51,7 @@ int16_t sprintmeter = SPRINTMAX;
 bool holding_b = false;
 uint8_t pagelocs[16] = {255};
 UFixed<0,8> moveaccum = 0;
+uint16_t timer1 = 0;
 
 RcContainer<NUMSPRITES, NUMINTERNALBYTES, SCREENWIDTH, HEIGHT> raycast(tilesheet, spritesheet, spritesheet_Mask);
 
@@ -79,6 +82,7 @@ void newgame()
 {
     state = GameState::Gameplay;
     current_pageview = 0;
+    timer1 = 0;
 
     world_x = 33;
     world_y = 60;
@@ -163,13 +167,7 @@ void movement()
         holding_b = false;
     }
 
-    moveaccum += abs(movement);
-
-    if(moveaccum > WALKSOUNDTRIGGER)
-    {
-        moveaccum = 0;
-        sound.tones(crunches + (rand() % CRUNCHES) * CRUNCHLEN);
-    }
+    walkingSound(movement);
 
     raycast.player.tryMovement(movement, rotation, &isSolid);
 
@@ -196,6 +194,17 @@ void movement()
         shift_sprites(-ofs_x, -ofs_y);
         load_sprites(ofs_x, ofs_y);
         load_region();
+    }
+}
+
+void walkingSound(float movement)
+{
+    moveaccum += abs(movement);
+
+    if(moveaccum > WALKSOUNDTRIGGER)
+    {
+        moveaccum = 0;
+        sound.tones(crunches + (rand() % CRUNCHES) * CRUNCHLEN);
     }
 }
 
@@ -484,11 +493,81 @@ void doMenu()
     FX::drawBitmap(x1, y, soundgraphic, 0, dbmInvert); 
     FX::drawBitmap(x2, y, soundgraphic, 1, dbmInvert); 
 
-    if(arduboy.justPressed(A_BUTTON))
+    if(timer1)
+    {
+        shadeScreen<BLACK>(&arduboy, 1 - (timer1 - arduboy.frameCount) / (float)STDFADE, 0, 0, WIDTH, HEIGHT);
+
+        if(arduboy.frameCount >= timer1)
+            state = GameState::Intro;
+    }
+    else if(arduboy.justPressed(A_BUTTON))
     {
         arduboy.audio.saveOnOff();
-        newgame(); //TODO: Get rid of this later!
+        timer1 = arduboy.frameCount + STDFADE;
     }
+}
+
+void doIntro()
+{
+    //This is the first time we're calling this, get out
+    if(current_pageview == 0)
+    {
+        timer1 = arduboy.frameCount;
+        current_pageview = 1;
+        return;
+    }
+
+    //Now for the rest, we use timer in the opposite way, it's actually the start
+    //of the intro and we do things based on how far we are from it
+    uint16_t introt = arduboy.frameCount - timer1;
+
+    constexpr uint16_t text1black = FRAMERATE * 1.5;
+    constexpr uint16_t text1show = FRAMERATE * 1.5;
+    constexpr uint16_t text2show = FRAMERATE * 2.5;
+    constexpr uint16_t text2black = FRAMERATE * 1.5;
+
+    constexpr uint16_t text1end = text1black + text1show + STDFADE * 2;
+    constexpr uint16_t text2end = text1end + text2show + STDFADE * 2 + text2black;
+    constexpr uint16_t text1fadef = text1black + STDFADE + text1show;
+    constexpr uint16_t text2fadef = text1end + STDFADE + text2show;
+
+    if(introt < text1black)
+    {
+        // Do nothing for now
+    } 
+    else if(introt < text1end)
+    {
+        tinyfont.setCursor(26, 29);
+        tinyfont.print(F("haloopdy - 2023"));
+
+        if(introt < text1black + STDFADE) //fade in
+            shadeScreen<BLACK>(&arduboy, 1 - (introt - text1black) / (float)STDFADE, 0, 0, WIDTH, HEIGHT);
+        else if(introt > text1fadef) //fade out
+            shadeScreen<BLACK>(&arduboy, (introt - text1fadef) / (float)STDFADE, 0, 0, WIDTH, HEIGHT);
+    }
+    else if(introt < text2end)
+    {
+        tinyfont.setCursor(42, 20);
+        tinyfont.print(F("Based on:"));
+        tinyfont.setCursor(5, 26);
+        tinyfont.print(F("Slender: The Eight Pages"));
+        tinyfont.setCursor(10, 38);
+        tinyfont.print(F("by Parsec Productions"));
+
+        if(introt < text1end + STDFADE) //fade in
+            shadeScreen<BLACK>(&arduboy, 1 - (introt - text1end) / (float)STDFADE, 0, 0, WIDTH, HEIGHT);
+        else if(introt > text2fadef) //fade out
+            shadeScreen<BLACK>(&arduboy, min(1.0f, (introt - text2fadef) / (float)STDFADE), 0, 0, WIDTH, HEIGHT);
+    }
+    else
+    {
+        newgame();
+    }
+
+    constexpr uint16_t walkend = text2fadef;
+
+    if(introt < walkend)
+        walkingSound(MOVESPEED);
 }
 
 
@@ -501,6 +580,10 @@ void loop()
     if(state == GameState::Menu)
     {
         doMenu();
+    }
+    else if(state == GameState::Intro)
+    {
+        doIntro();
     }
     else
     {
