@@ -15,7 +15,7 @@ constexpr float MOVESPEED = 3.25f / FRAMERATE;
 constexpr float ROTSPEED = 3.5f / FRAMERATE;
 #else
 constexpr float MOVESPEED = 1.25f / FRAMERATE;
-constexpr float ROTSPEED = 1.5f / FRAMERATE;
+constexpr float ROTSPEED = 2.0f / FRAMERATE;
 #endif
 
 constexpr float MOVEMULTIPLIER = 2.25;

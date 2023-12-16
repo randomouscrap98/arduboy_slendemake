@@ -14,9 +14,10 @@
 
 // Some debug junk
 //#define DEBUGPAGES
-#define DEBUGMOVEMENT
-#define SKIPINTRO
+//#define DEBUGMOVEMENT
+//#define SKIPINTRO
 #define INFINITESPRINT
+//#define ARESTARTS
 //#define DRAWMAP
 //#define VARIABLEFPS
 
@@ -87,6 +88,8 @@ void newgame()
 {
     state = GameState::Gameplay;
     current_pageview = 0;
+    page_bitflag = 0;
+    moveaccum = 0;
     current_bg = rotbg;
     timer1 = 0;
 
@@ -199,11 +202,13 @@ void movement()
         holding_b = false;
     }
 
+    #ifdef ARESTARTS
     if(arduboy.justPressed(A_BUTTON))
     {
         newgame();
         //sound.tones(drone);
     }
+    #endif
 
     walkingSound(movement);
 
