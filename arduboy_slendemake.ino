@@ -16,6 +16,7 @@
 //#define DEBUGPAGES
 #define DEBUGMOVEMENT
 #define SKIPINTRO
+#define INFINITESPRINT
 //#define DRAWMAP
 //#define VARIABLEFPS
 
@@ -102,6 +103,8 @@ void newgame()
     raycast.player.dirX = 0;
     raycast.player.dirY = -1;
 
+    raycast.sprites.resetAll();
+
     spawnPages();
 
     load_region();
@@ -114,14 +117,16 @@ void spawnPages()
 {
     #ifdef DEBUGPAGES
     //Put all the pages right in a row in front of the player
-    for(uint8_t i = 0; i < 16; i += 2)
+    for(uint8_t i = 0; i < NUMPAGES * 2; i += 2)
     {
         pagelocs[i] = world_x - 4 + i / 2;
         pagelocs[i + 1] = world_y - 2;
     }
     #else
-    uint8_t usedlocs[8];
-    for(uint8_t i = 0; i < 8; i++)
+    //Find nice locations to place them based on the spawn points indicated on the map 
+    //(in the fx data)
+    uint8_t usedlocs[NUMPAGES];
+    for(uint8_t i = 0; i < NUMPAGES; i++)
     {
         //Try to pick a location that hasn't been used yet. This is the wasteful part
 spawnPagesRetry:
@@ -169,8 +174,10 @@ void movement()
 
     if (arduboy.pressed(B_BUTTON) && (movement || rotation))
     {
+        #ifndef INFINITESPRINT
         //We're mean and always drain sprint meter if holding B and moving
         sprintmeter -= SPRINTDRAIN;
+        #endif
 
         if(sprintmeter < 0)
             sprintmeter = 0;
@@ -194,7 +201,8 @@ void movement()
 
     if(arduboy.justPressed(A_BUTTON))
     {
-        sound.tones(drone);
+        newgame();
+        //sound.tones(drone);
     }
 
     walkingSound(movement);
@@ -383,7 +391,7 @@ void load_sprite(uint8_t x, uint8_t y, uint8_t local_x, uint8_t local_y)
         return;
     
     //Load pages if they exist. This could become a performance issue?
-    for(uint8_t i = 0; i < 16; i += 2)
+    for(uint8_t i = 0; i < NUMPAGES * 2; i += 2)
     {
         if(x == pagelocs[i] && y == pagelocs[i + 1])
             load_pagesprite(local_x, local_y, i >> 1);
@@ -469,8 +477,8 @@ void drawRotBg()
     uint16_t offset = (2 * M_PI - raycast.player.getAngle()) * ROTBGSCALE;
     
     //We simply copy the buffer into the screen. That's all
-    for(uint8_t x = 0; x < 8; x++)
-        FX::readDataBytes(current_bg + offset + x * rotbgWidth, arduboy.sBuffer + x * WIDTH, SCREENWIDTH);
+    for(uint8_t y = 0; y < HEIGHT / 8; y++)
+        FX::readDataBytes(current_bg + offset + y * rotbgWidth, arduboy.sBuffer + y * WIDTH, SCREENWIDTH);
 }
 
 void drawSidebar()
@@ -481,7 +489,7 @@ void drawSidebar()
     constexpr uint8_t PAGEHEIGHT = 8;
     constexpr uint8_t PAGESPACE = 3;
 
-    for(uint8_t i = 0; i < 8; i++)
+    for(uint8_t i = 0; i < NUMPAGES; i++)
     {
         uint8_t x = raycast.render.VIEWWIDTH + 7 + (PAGESPACE + PAGEWIDTH) * (i & 1);
         uint8_t y = 7 + (PAGEHEIGHT + PAGESPACE) * (i / 2);

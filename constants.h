@@ -33,6 +33,7 @@ constexpr uint8_t PAGESPRITE = 10;
 constexpr uint8_t PAGESCALE = 2;
 constexpr uint8_t PAGEMASK = 128;
 constexpr uint8_t NUMLOCATIONS = 10;
+constexpr uint8_t NUMPAGES = 8;
 
 struct SpriteMeta {
     int8_t offset;
