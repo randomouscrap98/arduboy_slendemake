@@ -18,6 +18,7 @@
 #define SKIPINTRO
 #define INFINITESPRINT
 #define SPAWNSLENDERCLOSE
+//#define NOSTATICACCUM
 //#define PRINTSTATIC
 //#define NOFOG
 //#define ARESTARTS
@@ -32,7 +33,11 @@
 #include "constants.h"
 #include "utils.h"
 
-//ARDUBOY_NO_USB
+//For some reason, we run out of ram (even though we have plenty) when
+//printing the values
+#ifdef PRINTSTATIC
+ARDUBOY_NO_USB
+#endif
 
 
 enum GameState
@@ -69,6 +74,7 @@ uint8_t slenderY;
 
 SFixed<13,2> staticaccum = 0;
 uint8_t staticbase = 0;
+uint8_t lastStatic = 0;
 
 RcContainer<NUMSPRITES, NUMINTERNALBYTES, SCREENWIDTH, HEIGHT> raycast(tilesheet, spritesheet, spritesheet_Mask);
 
@@ -104,6 +110,7 @@ void newgame()
     moveaccum = 0;
     staticaccum = 0;
     staticbase = 0;
+    lastStatic = 0;
     current_bg = rotbg;
     timer1 = 0;
 
@@ -373,6 +380,7 @@ void behavior_slender(RcSprite<NUMINTERNALBYTES> * sprite)
 
         #ifdef PRINTSTATIC
         arduboy.fillRect(105, 1, 20, 20, BLACK);
+        tinyfont.setTextColor(WHITE);
         #endif
 
         if(infront && distance < MINSTATICDISTANCE)
@@ -636,7 +644,6 @@ void drawSprintMeter()
     arduboy.drawFastHLine(raycast.render.VIEWWIDTH + 7, HEIGHT - 4, 15 * sprintmeter / SPRINTMAX, WHITE);
 }
 
-uint8_t lastStatic = 0;
 
 void drawStatic(uint8_t amount) //uint16_t amount)
 {
@@ -648,18 +655,8 @@ void drawStatic(uint8_t amount) //uint16_t amount)
     //still too flashy for a lot of people
     if((arduboy.frameCount % STATICFREQUENCY) == 0)
         lastStatic = rand() % amount;
-    //uint8_t s = rand() % amount;
-    //arduboy.frameCount % amount; //rand() % amount;
 
     shadeScreen<WHITE>(&arduboy, (float)lastStatic / 256, 0, 0, SCREENWIDTH, HEIGHT);
-
-    //for(uint16_t i = 0; i < amount; i++)
-    //{
-    //    uint16_t loc = rand() & (WIDTH * HEIGHT / 8 - 1);
-    //    if((loc & (WIDTH - 1)) >= SCREENWIDTH)
-    //        continue;
-    //    arduboy.sBuffer[loc] = 0xFF; //White looks like rain
-    //}
 }
 
 void doMenu()
