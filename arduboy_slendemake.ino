@@ -14,9 +14,10 @@
 
 // Some debug junk
 //#define DEBUGPAGES
-#define DEBUGMOVEMENT
+//#define DEBUGMOVEMENT
 #define SKIPINTRO
 #define INFINITESPRINT
+#define SPAWNSLENDERCLOSE
 //#define NOFOG
 //#define ARESTARTS
 //#define DRAWMAP
@@ -38,6 +39,7 @@ enum GameState
     Menu,
     Intro,
     Gameplay,
+    Gameover,
     Escape
 };
 
@@ -47,11 +49,11 @@ Arduboy2Base arduboy;
 ArduboyTones sound(arduboy.audio.enabled);
 Tinyfont tinyfont = Tinyfont(arduboy.sBuffer, Arduboy2::width(), Arduboy2::height());
 
-uint8_t world_x = 3;
-uint8_t world_y = 3;
+uint8_t world_x;
+uint8_t world_y;
 
-uint8_t page_bitflag = 0;
-uint8_t current_pageview = 0;  //Starts at 1, but pages are really 0 indexed
+uint8_t page_bitflag;
+uint8_t current_pageview;  //Starts at 1, but pages are really 0 indexed
 int16_t sprintmeter = SPRINTMAX;
 bool holding_b = false;
 uint8_t pagelocs[16] = {255};
@@ -59,6 +61,13 @@ UFixed<0,8> moveaccum = 0;
 uint16_t timer1 = 0;
 uint8_t bgsoundtimer = 0;
 uint24_t current_bg = rotbg;
+
+//Slenderman doesn't need to move smoothly... or so I hope (hence only integer positions)
+uint8_t slenderX;
+uint8_t slenderY;
+
+int16_t staticaccum = 0;
+uint8_t staticbase = 0;
 
 RcContainer<NUMSPRITES, NUMINTERNALBYTES, SCREENWIDTH, HEIGHT> raycast(tilesheet, spritesheet, spritesheet_Mask);
 
@@ -92,11 +101,22 @@ void newgame()
     current_pageview = 0;
     page_bitflag = 0;
     moveaccum = 0;
+    staticaccum = 0;
+    staticbase = 0;
     current_bg = rotbg;
     timer1 = 0;
 
     world_x = 33;
     world_y = 60;
+
+    #ifdef SPAWNSLENDERCLOSE
+    slenderX = world_x;
+    slenderY = world_y - 5;
+    #else
+    //Way outside the realm of possibility to start
+    slenderX = 255;
+    slenderY = 255;
+    #endif
 
     #ifdef NOFOG
     raycast.render.altWallShading = RcShadingType::None;
@@ -210,7 +230,8 @@ void movement()
     }
     else
     {
-        sprintmeter = min(sprintmeter + SPRINTRECOVER, SPRINTMAX);
+        uint16_t newsprint = sprintmeter + SPRINTRECOVER;
+        sprintmeter = min(newsprint, SPRINTMAX);
         holding_b = false;
     }
 
@@ -316,7 +337,75 @@ void behavior_page(RcSprite<NUMINTERNALBYTES> * sprite)
 
 void behavior_slender(RcSprite<NUMINTERNALBYTES> * sprite)
 {
-    //Not yet
+    //Calculate real location. Everything is relative to the player, hence offsetting by the cage center
+    uint8_t x = slenderX - world_x + CAGEX;
+    uint8_t y = slenderY - world_y + CAGEY;
+
+    //If not possible, get him out
+    if(x >= RCMAXMAPDIMENSION || y >= RCMAXMAPDIMENSION)
+    {
+        sprite->x = 0;
+        sprite->y = 0;
+    }
+    else
+    {
+        sprite->x = x + 0.5;
+        sprite->y = y + 0.5;
+
+        //float sx = (float)sprite->x;
+        //float sy = (float)sprite->y;
+        float dx = (float)sprite->x - (float)raycast.player.posX;
+        float dy = (float)sprite->y - (float)raycast.player.posY;
+
+        //calc distance. We may not need sqrt, watch for it
+        float distance = sqrt(dx * dx + dy * dy);
+
+        //Calc the two angles
+        float pangle = raycast.player.getAngle();
+        float sangle = atan2(dy, dx); //sy - (float)raycast.player.posY, sx - (float)raycast.player.posX);
+
+        //Slender is in front of the player if the difference of angles puts it on the right of the 
+        //unit circle. This works because:
+        //-If player is facing slender head on, angle diff = 0
+        //-If slender is perfectly to left of player, angle diff = 90 degrees
+        //-If slender is perfectly to right of player, angle diff = 270 degrees
+        //So range is 90 - 270 degrees, which is the full right side of unit circle
+        bool infront = false; //cos(sangle - pangle) > FRONTFOCAL;
+
+        if(infront && distance < MINSTATICDISTANCE)
+        {
+            if(distance > MINSTATICDISTANCE / 3)
+            {
+                if(!((distance > MINSTATICDISTANCE * 2 / 3) && (arduboy.frameCount & 1)))
+                    staticaccum++;
+            }
+            else
+            {
+                staticaccum += 2;
+            }
+        }
+        else if(staticaccum)
+        {
+            staticaccum -= STATICDRAIN;
+        }
+
+        //Cut it off from being too ridiculous
+        if(staticaccum > 255) staticaccum = 255;
+        if(staticaccum < 0) staticaccum = 0;
+
+        if(distance < DEATHDISTANCE)
+        {
+            staticbase = 255;
+        }
+        else if(distance < MINSTATICDISTANCE)
+        {
+            staticbase = min(255, 255 * (1 - pow(distance / MINSTATICDISTANCE, STATICDISTSCALE)));
+        }
+        else
+        {
+            staticbase = 0;
+        }
+    }
 }
 
 /*
@@ -696,6 +785,11 @@ void doEscape()
     }
 }
 
+void doGameOver()
+{
+
+}
+
 
 void loop()
 {
@@ -715,6 +809,10 @@ void loop()
     {
         doEscape();
     }
+    else if(state == GameState::Gameover)
+    {
+        doGameOver();
+    }
     else
     {
         // Process player movement + interaction
@@ -730,7 +828,11 @@ void loop()
         raycast.runIteration(&arduboy);
 
         if(current_pageview)
+        {
+            //"Reset" accumulated static when viewing a page. This is to give the player some respite
+            staticaccum = 0;
             drawPage(current_pageview - 1);
+        }
 
         #ifdef DRAWMAP
         raycast.worldMap.drawMap(&arduboy, 105, 0);
@@ -738,6 +840,10 @@ void loop()
 
         if(page_bitflag == 255)
         {
+            //these really only need to be set once but whatever
+            slenderX = 255;
+            slenderY = 255;
+
             timer1++;
             constexpr uint16_t initialfade = FRAMERATE * 6;
             constexpr uint16_t secondaryfade = FRAMERATE * 10 + initialfade;
@@ -773,7 +879,10 @@ void loop()
         {
             //These are things that happen when you haven't won yet
             bgSound();
-            drawStatic(0); //This kind of only works if you call it every frame
+            uint8_t s = min(255, staticaccum + staticbase); 
+            if(s == 255)
+                state = GameState::Gameover;
+            drawStatic(s); //This kind of only works if you call it every frame
         }
     }
 

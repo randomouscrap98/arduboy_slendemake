@@ -90,4 +90,9 @@ constexpr int16_t SPRINTRECOVER = SPRINTMAX / (FRAMERATE * SPRINTREC_SECS);
 constexpr UFixed<0,8> WALKSOUNDTRIGGER = 0.8;
 constexpr uint8_t BGSOUNDTRIGGER = FRAMERATE * 3;
 constexpr uint8_t STATICFREQUENCY = FRAMERATE / 10;
+constexpr float FRONTFOCAL = 0.4;
+constexpr uint8_t STATICDRAIN = 255.0 / FRAMERATE;
+constexpr float MINSTATICDISTANCE = 5.0;
+constexpr float DEATHDISTANCE = 0.5;
+constexpr float STATICDISTSCALE = 0.15; // Lower = less noticeable static at farther distance
 //constexpr uint8_t SPRITEGC_PERFRAME = 3;  // How many sprites to loop through per frame for garbage collect
