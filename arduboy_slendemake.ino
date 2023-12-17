@@ -14,9 +14,10 @@
 
 // Some debug junk
 //#define DEBUGPAGES
-//#define DEBUGMOVEMENT
-//#define SKIPINTRO
+#define DEBUGMOVEMENT
+#define SKIPINTRO
 #define INFINITESPRINT
+//#define NOFOG
 //#define ARESTARTS
 //#define DRAWMAP
 //#define VARIABLEFPS
@@ -56,6 +57,7 @@ bool holding_b = false;
 uint8_t pagelocs[16] = {255};
 UFixed<0,8> moveaccum = 0;
 uint16_t timer1 = 0;
+uint8_t bgsoundtimer = 0;
 uint16_t current_bg = rotbg;
 
 RcContainer<NUMSPRITES, NUMINTERNALBYTES, SCREENWIDTH, HEIGHT> raycast(tilesheet, spritesheet, spritesheet_Mask);
@@ -96,10 +98,18 @@ void newgame()
     world_x = 33;
     world_y = 60;
 
+    #ifdef NOFOG
+    raycast.render.altWallShading = RcShadingType::None;
+    raycast.render.shading = RcShadingType::None;
+    raycast.render.spriteShading = RcShadingType::None;
+    raycast.render.setLightIntensity(NORMALLIGHT);
+    //raycast.render.setLightIntensity(DAYLIGHT);
+    #else
     raycast.render.altWallShading = RcShadingType::Black;
     raycast.render.shading = RcShadingType::Black;
     raycast.render.spriteShading = RcShadingType::Black;
     raycast.render.setLightIntensity(NORMALLIGHT);
+    #endif
 
     raycast.player.posX = CAGEX + 0.5;
     raycast.player.posY = CAGEY + 0.5;
@@ -107,6 +117,8 @@ void newgame()
     raycast.player.dirY = -1;
 
     raycast.sprites.resetAll();
+
+    RcSprite<NUMINTERNALBYTES> * slender = raycast.sprites.addSprite(0, 0, SLENDERSPRITE, 1, 0, &behavior_slender);
 
     spawnPages();
 
@@ -251,6 +263,21 @@ void walkingSound(float movement)
     }
 }
 
+void bgSound()
+{
+    // Sound only after first page
+    if(page_bitflag)
+    {
+        bgsoundtimer++;
+
+        if(bgsoundtimer > BGSOUNDTRIGGER && !sound.playing())
+        {
+            sound.tones(drone);
+            bgsoundtimer = 0;
+        }
+    }
+}
+
 void checkPagePickup()
 {
     RcBounds * colliding_page = raycast.sprites.firstColliding(raycast.player.posX, raycast.player.posY, PAGEMASK);
@@ -287,6 +314,11 @@ void behavior_page(RcSprite<NUMINTERNALBYTES> * sprite)
     sprite->setHeight(4 * sin(arduboy.frameCount / 6.0));
 }
 
+void behavior_slender(RcSprite<NUMINTERNALBYTES> * sprite)
+{
+    //Not yet
+}
+
 /*
 void behavior_animate_16(RcSprite<2> * sprite) {
     sprite->frame = sprite->intstate[0] + ((arduboy.frameCount >> 4) & (sprite->intstate[1] - 1));
@@ -297,7 +329,8 @@ void behavior_animate_16(RcSprite<2> * sprite) {
 //erases sprites that go outside the usable area
 void shift_sprites(int8_t x, int8_t y)
 {
-    for(uint8_t i = 0; i < NUMSPRITES; i++)
+    //We allocate slenderman in slot 0, so we skip that in calculations
+    for(uint8_t i = 1; i < NUMSPRITES; i++)
     {
         RcSprite<NUMINTERNALBYTES> * sp = raycast.sprites[i];
         if(sp->isActive())
@@ -692,7 +725,7 @@ void loop()
             }
             else if(timer1 == initialfade)
             {
-                raycast.render.altWallShading = RcShadingType::White;
+                raycast.render.altWallShading = RcShadingType::None;
                 raycast.render.shading = RcShadingType::White;
                 raycast.render.spriteShading = RcShadingType::White;
                 raycast.render.setLightIntensity(DAYLIGHT);
@@ -709,6 +742,11 @@ void loop()
                     current_pageview = 0;
                 }
             }
+        }
+        else
+        {
+            //These are things that happen when you haven't won yet
+            bgSound();
         }
     }
 

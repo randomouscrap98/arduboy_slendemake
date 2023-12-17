@@ -21,7 +21,7 @@ constexpr float ROTSPEED = 2.0f / FRAMERATE;
 constexpr float MOVEMULTIPLIER = 2.25;
 constexpr float ROTMULTIPLIER = 2.25;
 
-constexpr float DAYLIGHT = 6.5;
+constexpr float DAYLIGHT = 5.5;
 constexpr float NORMALLIGHT = 2.5;
 constexpr float SPRINTLIGHT = 1.0;
 
@@ -34,6 +34,8 @@ constexpr uint8_t PAGESCALE = 2;
 constexpr uint8_t PAGEMASK = 128;
 constexpr uint8_t NUMLOCATIONS = 10;
 constexpr uint8_t NUMPAGES = 8;
+
+constexpr uint8_t SLENDERSPRITE = 11;
 
 struct SpriteMeta {
     int8_t offset;
@@ -86,4 +88,5 @@ constexpr int16_t SPRINTDRAIN = SPRINTMAX / (FRAMERATE * SPRINT_SECS);
 constexpr int16_t SPRINTRECOVER = SPRINTMAX / (FRAMERATE * SPRINTREC_SECS); 
 
 constexpr UFixed<0,8> WALKSOUNDTRIGGER = 0.8;
+constexpr uint8_t BGSOUNDTRIGGER = FRAMERATE * 3;
 //constexpr uint8_t SPRITEGC_PERFRAME = 3;  // How many sprites to loop through per frame for garbage collect
