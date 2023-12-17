@@ -89,4 +89,5 @@ constexpr int16_t SPRINTRECOVER = SPRINTMAX / (FRAMERATE * SPRINTREC_SECS);
 
 constexpr UFixed<0,8> WALKSOUNDTRIGGER = 0.8;
 constexpr uint8_t BGSOUNDTRIGGER = FRAMERATE * 3;
+constexpr uint8_t STATICFREQUENCY = FRAMERATE / 10;
 //constexpr uint8_t SPRITEGC_PERFRAME = 3;  // How many sprites to loop through per frame for garbage collect

@@ -13,10 +13,10 @@
 #include <ArduboyRaycast_Shading.h>
 
 // Some debug junk
-#define DEBUGPAGES
+//#define DEBUGPAGES
 #define DEBUGMOVEMENT
 #define SKIPINTRO
-//#define INFINITESPRINT
+#define INFINITESPRINT
 //#define NOFOG
 //#define ARESTARTS
 //#define DRAWMAP
@@ -552,6 +552,32 @@ void drawSprintMeter()
     arduboy.drawFastHLine(raycast.render.VIEWWIDTH + 7, HEIGHT - 4, 15 * sprintmeter / SPRINTMAX, WHITE);
 }
 
+uint8_t lastStatic = 0;
+
+void drawStatic(uint8_t amount) //uint16_t amount)
+{
+    //Prevent drawing static MOST of the time (it's somewhat expensive)
+    if(!amount) return;
+
+    //Only change static slowly, at a rate dependent on framerate. Changing 
+    //AT the framerate is hard to look at, even for me. Even as is, it's probably
+    //still too flashy for a lot of people
+    if((arduboy.frameCount % STATICFREQUENCY) == 0)
+        lastStatic = rand() % amount;
+    //uint8_t s = rand() % amount;
+    //arduboy.frameCount % amount; //rand() % amount;
+
+    shadeScreen<WHITE>(&arduboy, (float)lastStatic / 256, 0, 0, SCREENWIDTH, HEIGHT);
+
+    //for(uint16_t i = 0; i < amount; i++)
+    //{
+    //    uint16_t loc = rand() & (WIDTH * HEIGHT / 8 - 1);
+    //    if((loc & (WIDTH - 1)) >= SCREENWIDTH)
+    //        continue;
+    //    arduboy.sBuffer[loc] = 0xFF; //White looks like rain
+    //}
+}
+
 void doMenu()
 {
     if(arduboy.justPressed(LEFT_BUTTON) || arduboy.justPressed(RIGHT_BUTTON))
@@ -747,6 +773,7 @@ void loop()
         {
             //These are things that happen when you haven't won yet
             bgSound();
+            drawStatic(0); //This kind of only works if you call it every frame
         }
     }
 
