@@ -18,6 +18,7 @@
 #define SKIPINTRO
 #define INFINITESPRINT
 #define SPAWNSLENDERCLOSE
+//#define PRINTSTATIC
 //#define NOFOG
 //#define ARESTARTS
 //#define DRAWMAP
@@ -66,7 +67,7 @@ uint24_t current_bg = rotbg;
 uint8_t slenderX;
 uint8_t slenderY;
 
-int16_t staticaccum = 0;
+SFixed<13,2> staticaccum = 0;
 uint8_t staticbase = 0;
 
 RcContainer<NUMSPRITES, NUMINTERNALBYTES, SCREENWIDTH, HEIGHT> raycast(tilesheet, spritesheet, spritesheet_Mask);
@@ -352,8 +353,6 @@ void behavior_slender(RcSprite<NUMINTERNALBYTES> * sprite)
         sprite->x = x + 0.5;
         sprite->y = y + 0.5;
 
-        //float sx = (float)sprite->x;
-        //float sy = (float)sprite->y;
         float dx = (float)sprite->x - (float)raycast.player.posX;
         float dy = (float)sprite->y - (float)raycast.player.posY;
 
@@ -362,7 +361,7 @@ void behavior_slender(RcSprite<NUMINTERNALBYTES> * sprite)
 
         //Calc the two angles
         float pangle = raycast.player.getAngle();
-        float sangle = atan2(dy, dx); //sy - (float)raycast.player.posY, sx - (float)raycast.player.posX);
+        float sangle = atan2(dy, dx); 
 
         //Slender is in front of the player if the difference of angles puts it on the right of the 
         //unit circle. This works because:
@@ -370,21 +369,24 @@ void behavior_slender(RcSprite<NUMINTERNALBYTES> * sprite)
         //-If slender is perfectly to left of player, angle diff = 90 degrees
         //-If slender is perfectly to right of player, angle diff = 270 degrees
         //So range is 90 - 270 degrees, which is the full right side of unit circle
-        bool infront = false; //cos(sangle - pangle) > FRONTFOCAL;
+        bool infront = cos(sangle - pangle) > FRONTFOCAL;
+
+        #ifdef PRINTSTATIC
+        arduboy.fillRect(105, 1, 20, 20, BLACK);
+        #endif
 
         if(infront && distance < MINSTATICDISTANCE)
         {
-            if(distance > MINSTATICDISTANCE / 3)
-            {
-                if(!((distance > MINSTATICDISTANCE * 2 / 3) && (arduboy.frameCount & 1)))
-                    staticaccum++;
-            }
-            else
-            {
-                staticaccum += 2;
-            }
+            SFixed<13,2> accumnow;
+            memcpy_P(&accumnow, STATICACCUMS + (uint8_t)distance, sizeof(SFixed<13,2>));
+            staticaccum += accumnow;
+
+            #ifdef PRINTSTATIC
+            tinyfont.setCursor(105, 6);
+            tinyfont.print((float)accumnow, 2);
+            #endif
         }
-        else if(staticaccum)
+        else
         {
             staticaccum -= STATICDRAIN;
         }
@@ -393,26 +395,19 @@ void behavior_slender(RcSprite<NUMINTERNALBYTES> * sprite)
         if(staticaccum > 255) staticaccum = 255;
         if(staticaccum < 0) staticaccum = 0;
 
-        if(distance < DEATHDISTANCE)
-        {
-            staticbase = 255;
-        }
-        else if(distance < MINSTATICDISTANCE)
-        {
-            staticbase = min(255, 255 * (1 - pow(distance / MINSTATICDISTANCE, STATICDISTSCALE)));
-        }
+        if(distance < MINSTATICDISTANCE)
+            staticbase = pgm_read_byte(STATICBASES + (uint8_t)(distance * 2));
         else
-        {
             staticbase = 0;
-        }
+
+        #ifdef PRINTSTATIC
+        tinyfont.setCursor(105, 1);
+        tinyfont.print(staticbase);
+        tinyfont.setCursor(105, 11);
+        tinyfont.print((float)staticaccum, 1);
+        #endif
     }
 }
-
-/*
-void behavior_animate_16(RcSprite<2> * sprite) {
-    sprite->frame = sprite->intstate[0] + ((arduboy.frameCount >> 4) & (sprite->intstate[1] - 1));
-}
-*/
 
 //Shift ALL sprites by the given amount in x and y (whole numbers only please!). Also
 //erases sprites that go outside the usable area
@@ -787,7 +782,14 @@ void doEscape()
 
 void doGameOver()
 {
+    shadeScreen<WHITE>(&arduboy, 1.0f, 0, 0, WIDTH, HEIGHT);
 
+    tinyfont.setCursor(42, 30);
+    tinyfont.setTextColor(BLACK);
+    tinyfont.print(F("NO ESCAPE"));
+
+    if(arduboy.justPressed(A_BUTTON))
+        newgame();
 }
 
 
@@ -879,7 +881,7 @@ void loop()
         {
             //These are things that happen when you haven't won yet
             bgSound();
-            uint8_t s = min(255, staticaccum + staticbase); 
+            uint8_t s = (uint8_t)min(255, staticaccum + (SFixed<13,2>)staticbase); 
             if(s == 255)
                 state = GameState::Gameover;
             drawStatic(s); //This kind of only works if you call it every frame
