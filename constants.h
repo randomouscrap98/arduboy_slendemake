@@ -62,7 +62,7 @@ constexpr SpriteMeta SPRITEMETAS[] PROGMEM = {
 // Since we're using this number so many times in template types, might 
 // as well make it a constant.
 constexpr uint8_t NUMINTERNALBYTES = 1;
-constexpr uint8_t NUMSPRITES = 38;
+constexpr uint8_t NUMSPRITES = 38; //NOTE: can reduce this to save RAM (something like 35 is safe, 33 probably minimum)
 
 // Some stuff for external map loading
 constexpr uint8_t CAGEX = 7;

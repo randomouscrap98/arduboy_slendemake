@@ -13,10 +13,10 @@
 #include <ArduboyRaycast_Shading.h>
 
 // Some debug junk
-//#define DEBUGPAGES
+#define DEBUGPAGES
 #define DEBUGMOVEMENT
 #define SKIPINTRO
-#define INFINITESPRINT
+//#define INFINITESPRINT
 //#define NOFOG
 //#define ARESTARTS
 //#define DRAWMAP
@@ -58,7 +58,7 @@ uint8_t pagelocs[16] = {255};
 UFixed<0,8> moveaccum = 0;
 uint16_t timer1 = 0;
 uint8_t bgsoundtimer = 0;
-uint16_t current_bg = rotbg;
+uint24_t current_bg = rotbg;
 
 RcContainer<NUMSPRITES, NUMINTERNALBYTES, SCREENWIDTH, HEIGHT> raycast(tilesheet, spritesheet, spritesheet_Mask);
 
