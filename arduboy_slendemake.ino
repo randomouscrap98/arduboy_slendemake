@@ -33,12 +33,6 @@
 #include "constants.h"
 #include "utils.h"
 
-//For some reason, we run out of ram (even though we have plenty) when
-//printing the values
-#ifdef PRINTSTATIC
-ARDUBOY_NO_USB
-#endif
-
 
 enum GameState
 {
@@ -698,13 +692,16 @@ void doMenu()
     }
 }
 
-void doTimedEvent(uint16_t time)
+bool doTimedEvent(uint16_t time)
 {
     if(arduboy.frameCount > timer1 + time)
     {
         timer1 = arduboy.frameCount;
         current_pageview++;
+        return true;
     }
+
+    return false;
 }
 
 void doIntro()
@@ -849,11 +846,8 @@ void doGameOver()
     else if(current_pageview == 5)
     {
         shadeScreen<BLACK>(&arduboy, 1.0f, 0, 0, WIDTH, HEIGHT);
-        doTimedEvent(STDFADE);
-    }
-    else
-    {
-        newgame();
+        if(doTimedEvent(STDFADE))
+            newgame();
     }
 }
 

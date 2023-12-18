@@ -98,9 +98,9 @@ constexpr SFixed<13,2> STATICACCUMS[] PROGMEM = {
     0, 0, 0, 0, 0, 0,
     #endif
     //Remember that 255 = death and certain distances add a fixed base to your death counter
-    75.0 / FRAMERATE,   //distance 0-1
-    75.0 / FRAMERATE,   //1-2
-    50.0 / FRAMERATE,   //2-3
+    150.0 / FRAMERATE,   //distance 0-1
+    100.0 / FRAMERATE,   //1-2
+    75.0 / FRAMERATE,   //2-3
     25.0 / FRAMERATE,   //3-4
     12.5 / FRAMERATE,   //4+
     12.5 / FRAMERATE    //Just in case
@@ -108,11 +108,6 @@ constexpr SFixed<13,2> STATICACCUMS[] PROGMEM = {
 
 constexpr uint8_t STATICBASES[] PROGMEM = {
     255,100, 50,20, 15,10, 9,9, 0,0
-    //255,180, 100,70, 50,30, 15,10, 9,9, 0,0
-    //128, 64, 32, 16, 8, 4
 };
 
 constexpr float MINSTATICDISTANCE = 4.0;
-//constexpr float DEATHDISTANCE = 0.5;
-//constexpr float STATICDISTSCALE = 0.15; // Lower = less noticeable static at farther distance
-//constexpr uint8_t SPRITEGC_PERFRAME = 3;  // How many sprites to loop through per frame for garbage collect
