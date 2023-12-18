@@ -15,7 +15,7 @@
 // Some debug junk
 //#define DEBUGPAGES
 //#define DEBUGMOVEMENT
-#define SKIPINTRO
+//#define SKIPINTRO
 #define INFINITESPRINT
 #define SPAWNSLENDERCLOSE
 //#define NOSTATICACCUM
@@ -669,7 +669,7 @@ void doMenu()
     bool audio = arduboy.audio.enabled();
     constexpr uint8_t x1 = 21;
     constexpr uint8_t x2 = 74;
-    constexpr uint8_t y = 16;
+    constexpr uint8_t y = 12;
     constexpr uint8_t pad = 2;
 
     arduboy.fillRect(x1 - pad, y - pad, 32 + 2 * pad, 32 + 2 * pad, audio ? WHITE : BLACK);
@@ -677,6 +677,10 @@ void doMenu()
 
     FX::drawBitmap(x1, y, soundgraphic, 0, dbmInvert); 
     FX::drawBitmap(x2, y, soundgraphic, 1, dbmInvert); 
+
+    tinyfont.setTextColor(WHITE);
+    tinyfont.setCursor(26, 54);
+    tinyfont.print(F("EPILEPSY WARNING"));
 
     if(timer1)
     {
