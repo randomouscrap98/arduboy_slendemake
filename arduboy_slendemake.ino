@@ -15,7 +15,7 @@
 // Some debug junk
 //#define DEBUGPAGES
 //#define DEBUGMOVEMENT
-//#define SKIPINTRO
+#define SKIPINTRO
 #define INFINITESPRINT
 #define SPAWNSLENDERCLOSE
 //#define NOSTATICACCUM

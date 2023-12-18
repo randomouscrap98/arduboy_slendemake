@@ -7,6 +7,7 @@ mapfile = os.path.join("..", "resources", "map.json")
 outfile = os.path.join("..", "fx", "fxdata.txt")
 entrancetile = 2
 pagesprite = 10
+slendersprite = 11
 tilesize = 16
 spriteview = 13
 spritemax = 30
@@ -51,9 +52,11 @@ height = tilelayer["height"]
 tmap = [0] * width * height
 smap = [0] * width * height * sbytes
 pages = [] # This will become a different structure later
+slenders = [] # This will become a different structure later
 
 for i in range(20):
     pages.append([])
+    slenders.append([])
 
 def tmi(x, y):
     """ tile map index """
@@ -106,6 +109,11 @@ for obj in objectlayer["objects"]:
         pages[locationid].append(mapx)
         pages[locationid].append(mapy)
         continue
+    elif id == slendersprite:
+        locationid = int(obj["name"]) # Throws an exception if bad, which is good
+        slenders[locationid].append(mapx)
+        slenders[locationid].append(mapy)
+        continue
 
     # See if there's already something in the sprite map. If so, fail
     assert smap[mapi] == 0, f"Two sprites in the same location: {mapx},{mapy}!"
@@ -131,6 +139,35 @@ for xo in range(width - spriteview):
 print(f"Dumping to {outfile}")
 
 
+# A function for dumping a double array, where internal arrays are uneven
+# sized and you want the output to be an offset into one big array. Used
+# for page and slender locations per "landmark"
+def dumplocbased(basename, data):
+    print(json.dumps(data))
+
+    indexes = []
+    totalraw = 0
+    f.write("uint8_t " + basename + "_raw[] = {\n")
+    for pi in range(len(data)):
+        if not len(data[pi]):
+            continue
+        indexes.append(totalraw)
+        totalraw += 1
+        # Write the length of the section first
+        f.write(f"{len(data[pi]) // 2}, ")
+        for v in data[pi]:
+            totalraw += 1
+            f.write(f"{v},")
+        f.write("\n")
+    f.write("}\n\n")
+
+    f.write("uint8_t " + basename + "_offsets[] = {\n")
+    for pi in indexes:
+        f.write(f"{pi},")
+    f.write("}\n\n")
+
+
+
 with open(outfile, "w") as f:
 
     f.write(f"//Entrance: {entrance_x},{entrance_y}\n")
@@ -153,28 +190,8 @@ with open(outfile, "w") as f:
         f.write("\n")
     f.write("}\n\n")
 
-    print(json.dumps(pages))
-
-    pageindexes = []
-    totalraw = 0
-    f.write("uint8_t pagelocs_raw[] = {\n")
-    for pi in range(len(pages)):
-        if not len(pages[pi]):
-            continue
-        pageindexes.append(totalraw)
-        totalraw += 1
-        # Write the length of the section first
-        f.write(f"{len(pages[pi]) // 2}, ")
-        for v in pages[pi]:
-            totalraw += 1
-            f.write(f"{v},")
-        f.write("\n")
-    f.write("}\n\n")
-
-    f.write("uint8_t pagelocs_offsets[] = {\n")
-    for pi in pageindexes:
-        f.write(f"{pi},")
-    f.write("}\n\n")
+    dumplocbased("pagelocs", pages)
+    dumplocbased("slenderlocs", slenders)
 
     f.write('image_t rotbg = "../resources/rotbg.png"\n\n')
     f.write('image_t rotbg_day = "../resources/rotbg_day.png"\n\n')

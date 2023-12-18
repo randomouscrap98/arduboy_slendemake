@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="64" height="64" tilewidth="16" tileheight="16" infinite="0" nextlayerid="3" nextobjectid="567">
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="64" height="64" tilewidth="16" tileheight="16" infinite="0" nextlayerid="3" nextobjectid="624">
  <editorsettings>
   <export target="map.json" format="json"/>
  </editorsettings>
@@ -583,5 +583,62 @@
   <object id="564" name="9" gid="27" x="671.636" y="241.273" width="16" height="16"/>
   <object id="565" name="9" gid="27" x="719.909" y="304.5" width="16" height="16"/>
   <object id="566" name="9" gid="27" x="687.795" y="320.932" width="16" height="16"/>
+  <object id="567" name="6" gid="28" x="684" y="785.333" width="16" height="16"/>
+  <object id="568" name="6" gid="28" x="605.333" y="803.333" width="16" height="16"/>
+  <object id="569" name="0" gid="28" x="344.667" y="842.667" width="16" height="16"/>
+  <object id="570" name="0" gid="28" x="256" y="808" width="16" height="16"/>
+  <object id="571" name="0" gid="28" x="162" y="903.333" width="16" height="16"/>
+  <object id="572" name="0" gid="28" x="364" y="973.333" width="16" height="16"/>
+  <object id="573" name="1" gid="28" x="80" y="586.667" width="16" height="16"/>
+  <object id="574" name="4" gid="28" x="210" y="410.667" width="16" height="16"/>
+  <object id="575" name="4" gid="28" x="378" y="292.667" width="16" height="16"/>
+  <object id="576" name="6" gid="28" x="941.333" y="944" width="16" height="16"/>
+  <object id="577" name="7" gid="28" x="976" y="317.333" width="16" height="16"/>
+  <object id="578" name="7" gid="28" x="988" y="546.667" width="16" height="16"/>
+  <object id="579" name="9" gid="28" x="674" y="364.667" width="16" height="16"/>
+  <object id="580" name="9" gid="28" x="616.667" y="227.333" width="16" height="16"/>
+  <object id="581" name="8" gid="28" x="816" y="63.3333" width="16" height="16"/>
+  <object id="582" name="8" gid="28" x="815.333" y="142" width="16" height="16"/>
+  <object id="583" name="8" gid="28" x="971.333" y="196.667" width="16" height="16"/>
+  <object id="584" name="3" gid="28" x="504" y="88.6667" width="16" height="16"/>
+  <object id="585" name="3" gid="28" x="444" y="205.333" width="16" height="16"/>
+  <object id="586" name="3" gid="28" x="341.333" y="210" width="16" height="16"/>
+  <object id="587" name="3" gid="28" x="285.333" y="34" width="16" height="16"/>
+  <object id="588" name="3" gid="28" x="226" y="104" width="16" height="16"/>
+  <object id="589" name="2" gid="28" x="130" y="233.333" width="16" height="16"/>
+  <object id="590" name="2" gid="28" x="40.6667" y="239.333" width="16" height="16"/>
+  <object id="591" name="2" gid="28" x="180" y="342" width="16" height="16"/>
+  <object id="592" name="5" gid="28" x="645.333" y="411.333" width="16" height="16"/>
+  <object id="593" name="5" gid="28" x="714" y="648.667" width="16" height="16"/>
+  <object id="594" name="5" gid="28" x="743.333" y="424.667" width="16" height="16"/>
+  <object id="595" name="1" gid="28" x="194.667" y="646" width="16" height="16"/>
+  <object id="596" name="2" gid="28" x="23.3333" y="324" width="16" height="16"/>
+  <object id="597" name="2" gid="28" x="47.3333" y="386" width="16" height="16"/>
+  <object id="598" name="3" gid="28" x="438" y="33.3333" width="16" height="16"/>
+  <object id="599" name="3" gid="28" x="400.667" y="199.333" width="16" height="16"/>
+  <object id="600" name="3" gid="28" x="307.333" y="220" width="16" height="16"/>
+  <object id="601" name="9" gid="28" x="677.333" y="183.333" width="16" height="16"/>
+  <object id="602" name="9" gid="28" x="730.667" y="348.667" width="16" height="16"/>
+  <object id="603" name="9" gid="28" x="584" y="312.667" width="16" height="16"/>
+  <object id="604" name="8" gid="28" x="992.667" y="50" width="16" height="16"/>
+  <object id="605" name="8" gid="28" x="968.667" y="34" width="16" height="16"/>
+  <object id="606" name="4" gid="28" x="266" y="315.333" width="16" height="16"/>
+  <object id="607" name="4" gid="28" x="310" y="711.333" width="16" height="16"/>
+  <object id="608" name="4" gid="28" x="380.667" y="692.667" width="16" height="16"/>
+  <object id="609" name="4" gid="28" x="417.333" y="703.333" width="16" height="16"/>
+  <object id="610" name="4" gid="28" x="542" y="586.667" width="16" height="16"/>
+  <object id="611" name="5" gid="28" x="526.667" y="622" width="16" height="16"/>
+  <object id="612" name="5" gid="28" x="676" y="665.333" width="16" height="16"/>
+  <object id="613" name="5" gid="28" x="638.667" y="668" width="16" height="16"/>
+  <object id="614" name="5" gid="28" x="770.667" y="606.667" width="16" height="16"/>
+  <object id="615" name="7" gid="28" x="930" y="321.333" width="16" height="16"/>
+  <object id="616" name="7" gid="28" x="844.667" y="462.667" width="16" height="16"/>
+  <object id="617" name="8" gid="28" x="810" y="200.667" width="16" height="16"/>
+  <object id="618" name="9" gid="28" x="783.333" y="170" width="16" height="16"/>
+  <object id="619" name="6" gid="28" x="980.667" y="831.333" width="16" height="16"/>
+  <object id="620" name="0" gid="28" x="300" y="1006" width="16" height="16"/>
+  <object id="621" name="1" gid="28" x="34" y="762" width="16" height="16"/>
+  <object id="622" name="1" gid="28" x="113.333" y="838" width="16" height="16"/>
+  <object id="623" name="1" gid="28" x="196" y="743.333" width="16" height="16"/>
  </objectgroup>
 </map>
