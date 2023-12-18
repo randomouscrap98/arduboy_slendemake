@@ -6,8 +6,8 @@ using uint24_t = __uint24;
 
 // Initialize FX hardware using  FX::begin(FX_DATA_PAGE); in the setup() function.
 
-constexpr uint16_t FX_DATA_PAGE  = 0xffa3;
-constexpr uint24_t FX_DATA_BYTES = 23748;
+constexpr uint16_t FX_DATA_PAGE  = 0xff93;
+constexpr uint24_t FX_DATA_BYTES = 27848;
 
 constexpr uint24_t staticmap_fx = 0x000000;
 constexpr uint24_t staticsprites_fx = 0x001000;
@@ -30,4 +30,9 @@ constexpr uint24_t soundgraphic = 0x005BC0;
 constexpr uint16_t soundgraphicWidth  = 32;
 constexpr uint16_t soundgraphicHeight = 32;
 constexpr uint8_t  soundgraphicFrames = 2;
+
+constexpr uint24_t gameover = 0x005CC4;
+constexpr uint16_t gameoverWidth  = 128;
+constexpr uint16_t gameoverHeight = 64;
+constexpr uint8_t  gameoverFrames = 4;
 

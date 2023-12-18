@@ -156,6 +156,14 @@ void newgame()
     drawSidebar();
 }
 
+void changeStateClean(GameState newstate)
+{
+    state = newstate;
+    current_pageview = 0;   //This is used in many states as a kind of secondary state (should just use a different variable...)
+    timer1 = 0;             //Reset the timers everything might use. If you need a timer that extends beyond states, well...
+    lastStatic = 0;         //This is also reused (though it probably shouldn't be...)
+}
+
 void spawnPages()
 {
     #ifdef DEBUGPAGES
@@ -690,6 +698,15 @@ void doMenu()
     }
 }
 
+void doTimedEvent(uint16_t time)
+{
+    if(arduboy.frameCount > timer1 + time)
+    {
+        timer1 = arduboy.frameCount;
+        current_pageview++;
+    }
+}
+
 void doIntro()
 {
     //This is the first time we're calling this, get out
@@ -779,15 +796,67 @@ void doEscape()
 
 void doGameOver()
 {
+    constexpr uint16_t flashingtime = FRAMERATE * 1.5;
+    constexpr uint16_t reprisetime = FRAMERATE * 1.5;
+    constexpr uint16_t flashingfrequency = 1;
+
+    //Just for ease, every frame of game over will be white
     shadeScreen<WHITE>(&arduboy, 1.0f, 0, 0, WIDTH, HEIGHT);
 
-    tinyfont.setCursor(42, 30);
-    tinyfont.setTextColor(BLACK);
-    tinyfont.print(F("NO ESCAPE"));
+    if(current_pageview == 0)
+    {
+        timer1 = arduboy.frameCount;
+        current_pageview = 1;
+    }
+    else if(current_pageview == 1)
+    {
+        //For the first x time, we do a random flash for some amount
+        if((arduboy.frameCount % flashingfrequency) == 0)
+            lastStatic = rand() % 3;
+        
+        if(lastStatic == 0 || arduboy.frameCount == timer1 + flashingtime)
+        {
+            //Display a (hopefully flash) of slenderman. The frame is dependent on how far you are through
+            //the frame.
+            uint8_t frame = min(3, 4 * float(arduboy.frameCount - timer1) / flashingtime);
+            FX::drawBitmap(0, 0, gameover, frame, dbmNormal);
+            sound.tones(screeching);
+        }
 
-    if(arduboy.justPressed(A_BUTTON))
+        doTimedEvent(flashingtime);
+    }
+    else if(current_pageview == 2)
+    {
+        doTimedEvent(reprisetime);
+    }
+    else if(current_pageview == 3)
+    {
+        tinyfont.setCursor(42, 30);
+        tinyfont.setTextColor(BLACK);
+        tinyfont.print(F("TRY AGAIN"));
+
+        if(arduboy.justPressed(A_BUTTON))
+        {
+            timer1 = arduboy.frameCount;
+            current_pageview++;
+        }
+    }
+    else if(current_pageview == 4)
+    {
+        shadeScreen<BLACK>(&arduboy, min(1.0f, float(arduboy.frameCount - timer1) / STDFADE), 0, 0, WIDTH, HEIGHT);
+        doTimedEvent(STDFADE);
+    }
+    else if(current_pageview == 5)
+    {
+        shadeScreen<BLACK>(&arduboy, 1.0f, 0, 0, WIDTH, HEIGHT);
+        doTimedEvent(STDFADE);
+    }
+    else
+    {
         newgame();
+    }
 }
+
 
 
 void loop()
@@ -867,11 +936,7 @@ void loop()
                 shadeScreen<WHITE>(&arduboy, min(1.0f, (timer1 - secondaryfade) / (FRAMERATE * 2.5f)), 0, 0, WIDTH, HEIGHT);
 
                 if(timer1 == finalcut)
-                {
-                    state = GameState::Escape;
-                    timer1 = 0;
-                    current_pageview = 0;
-                }
+                    changeStateClean(GameState::Escape);
             }
         }
         else
@@ -880,7 +945,7 @@ void loop()
             bgSound();
             uint8_t s = (uint8_t)min(255, staticaccum + (SFixed<13,2>)staticbase); 
             if(s == 255)
-                state = GameState::Gameover;
+                changeStateClean(GameState::Gameover);
             drawStatic(s); //This kind of only works if you call it every frame
         }
     }

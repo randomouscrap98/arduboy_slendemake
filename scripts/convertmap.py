@@ -180,6 +180,7 @@ with open(outfile, "w") as f:
     f.write('image_t rotbg_day = "../resources/rotbg_day.png"\n\n')
     f.write('image_t pages = "../resources/pages_48x64.png"\n\n')
     f.write('image_t soundgraphic = "../resources/sound_32x32.png"\n\n')
+    f.write('image_t gameover = "../resources/gameover_128x64.png"\n\n')
 
 
 print("Done!")
