@@ -398,7 +398,7 @@ void behavior_slender(RcSprite<NUMINTERNALBYTES> * sprite)
             //The distance has to be within some range for us to use it. We also don't want slenderman teleporting
             //when he's too close to the player (or at least, for most of the page) so we prevent that too
 
-            if(locdistance > minmax[0] && locdistance < minmax[1])
+            if(locdistance > minmax[0] && locdistance < minmax[1] && (rand() % (9 - numpages)) == 0 )
             {
                 slenderX = locdata[0];
                 slenderY = locdata[1];
@@ -409,19 +409,6 @@ void behavior_slender(RcSprite<NUMINTERNALBYTES> * sprite)
 
             //Scan just one location per frame.
             slenderLocScan = (slenderLocScan + 1) % slenderLocTotal;
-
-            //if(slenderLocScan == 0)
-            //{
-            //    sound.tone(200, 10);
-            //    arduboy.fillRect(105, 1, 23, 20, BLACK);
-            //    tinyfont.setTextColor(WHITE);
-            //    tinyfont.setCursor(105, 1);
-            //    tinyfont.print(locdistance, 1);
-            //    tinyfont.setCursor(105, 6);
-            //    tinyfont.print(minmax[0], 1);
-            //    tinyfont.setCursor(105, 11);
-            //    tinyfont.print(minmax[1], 1);
-            //}
         }
     }
     else

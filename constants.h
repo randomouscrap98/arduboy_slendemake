@@ -122,20 +122,20 @@ constexpr float TELEPORTDISTANCE[] PROGMEM = {
     4, 9.5, //7.0,
     3, 9.5, //6.5,
     2, 9.5, //6.0,
-    1, 9.5, //5.5,  //This range will always place him within static distance I think
+    1, 9.5, //5.5,  //He can basically spawn on top of you if you walk through the woods
     255, 255,
 };
 
-//Every 30 seconds you don't find a page, aggression increases
-constexpr float AGGRESSIONTIME = FRAMERATE * 30;
+//Every 45 seconds you don't find a page, aggression increases
+constexpr float AGGRESSIONTIME = FRAMERATE * 45;
 
 constexpr uint16_t FREETELEPORTCHANCE[] PROGMEM = {
     65535,  //No aggression, no teleport
     FRAMERATE * 8.0, //First aggression level (first page) is very slugish
-    FRAMERATE * 6.0,
-    FRAMERATE * 5.0, 
-    FRAMERATE * 4.5,
+    FRAMERATE * 5.0,
+    FRAMERATE * 4.5, 
     FRAMERATE * 4.0,
+    FRAMERATE * 3.5,
     FRAMERATE * 3.0,
     FRAMERATE * 2.0,
     FRAMERATE * 1.5,
