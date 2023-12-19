@@ -59,8 +59,8 @@ uint8_t world_y;
 
 uint8_t page_bitflag;
 uint8_t current_pageview;  //Starts at 1, but pages are really 0 indexed
-int16_t sprintmeter = SPRINTMAX;
-bool holding_b = false;
+int16_t sprintmeter;
+bool holding_b;
 uint8_t pagelocs[16] = {255};
 UFixed<0,8> moveaccum = 0;
 uint16_t timer1 = 0;
@@ -112,6 +112,8 @@ void newgame()
     staticbase = 0;
     lastStatic = 0;
     current_bg = rotbg;
+    sprintmeter = SPRINTMAX;
+    holding_b = false;
     timer1 = 0;
     bgsoundtimer = 0;
 
