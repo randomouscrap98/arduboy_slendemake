@@ -17,7 +17,8 @@
 //#define DEBUGMOVEMENT
 #define SKIPINTRO
 #define INFINITESPRINT
-#define SPAWNSLENDERCLOSE
+#define PRINTAGGRESSION
+//#define SPAWNSLENDERCLOSE
 //#define NOSTATICACCUM
 //#define PRINTSTATIC
 //#define NOFOG
@@ -65,6 +66,8 @@ uint24_t current_bg = rotbg;
 //Slenderman doesn't need to move smoothly... or so I hope (hence only integer positions)
 uint8_t slenderX;
 uint8_t slenderY;
+uint8_t slenderLocScan = 0;
+uint8_t slenderLocTotal = 0;
 
 SFixed<13,2> staticaccum = 0;
 uint8_t staticbase = 0;
@@ -120,6 +123,9 @@ void newgame()
     slenderY = 255;
     #endif
 
+    slenderLocScan = 0;
+    slenderLocTotal = FX::readIndexedUInt8(slenderlocs_trueraw, 0);
+
     #ifdef NOFOG
     raycast.render.altWallShading = RcShadingType::None;
     raycast.render.shading = RcShadingType::None;
@@ -156,6 +162,17 @@ void changeStateClean(GameState newstate)
     current_pageview = 0;   //This is used in many states as a kind of secondary state (should just use a different variable...)
     timer1 = 0;             //Reset the timers everything might use. If you need a timer that extends beyond states, well...
     lastStatic = 0;         //This is also reused (though it probably shouldn't be...)
+}
+
+uint8_t numfoundpages()
+{
+    uint8_t count = 0;
+
+    for(uint8_t i = 1; i != 0; i <<= 1)
+        if(page_bitflag & i)
+            count++;
+
+    return count;
 }
 
 void spawnPages()
@@ -336,7 +353,8 @@ void waitPageDismiss()
 
         drawSidebar();
 
-        //TODO: Check if page_bitflag is 255, finish game if so. Will they be simple timers?
+        //Only on page dismiss do we start the "timer"
+        timer1 = arduboy.frameCount;
     }
 }
 
@@ -348,14 +366,52 @@ void behavior_page(RcSprite<NUMINTERNALBYTES> * sprite)
 void behavior_slender(RcSprite<NUMINTERNALBYTES> * sprite)
 {
     //Calculate real location. Everything is relative to the player, hence offsetting by the cage center
-    uint8_t x = slenderX - world_x + CAGEX;
-    uint8_t y = slenderY - world_y + CAGEY;
+    int8_t x = slenderX - world_x + CAGEX;
+    int8_t y = slenderY - world_y + CAGEY;
+
+    uint8_t numpages = numfoundpages();
 
     //If not possible, get him out
-    if(x >= RCMAXMAPDIMENSION || y >= RCMAXMAPDIMENSION)
+    if(x >= RCMAXMAPDIMENSION || y >= RCMAXMAPDIMENSION || x < 0 || y < 0)
     {
         sprite->x = 0;
         sprite->y = 0;
+
+        //If he's not on the playing field with the player, we should find a new place to put him.
+        //Though, perhaps that should be tied to some kind of aggression stat?
+
+        if(numpages > 0)
+        {
+            uint8_t locdata[SLENDERLOCBYTES];
+            FX::readDataBytes(slenderlocs_trueraw + 1 + (uint16_t)slenderLocScan * SLENDERLOCBYTES, locdata, SLENDERLOCBYTES);
+
+            float dx = locdata[0] - world_x;
+            float dy = locdata[1] - world_y;
+
+            //Get the distance to this location
+            float locdistance = sqrt(dx * dx + dy * dy);
+
+            float minmax[2];
+            memcpy_P(minmax, TELEPORTDISTANCE + 2 * sizeof(float) * numpages, 2 * sizeof(float));
+
+            //The distance has to be within some range for us to use it. We also don't want slenderman teleporting
+            //when he's too close to the player (or at least, for most of the page) so we prevent that too
+
+            if(locdistance > minmax[0] && locdistance < minmax[1])
+            {
+                slenderX = locdata[0];
+                slenderY = locdata[1];
+                sound.tone(400, 50);
+            }
+
+            //Scan just one location per frame.
+            slenderLocScan = (slenderLocScan + 1) % slenderLocTotal;
+
+            if(slenderLocScan == 0)
+            {
+                sound.tone(200, 10);
+            }
+        }
     }
     else
     {
@@ -416,7 +472,26 @@ void behavior_slender(RcSprite<NUMINTERNALBYTES> * sprite)
         tinyfont.setCursor(105, 11);
         tinyfont.print((float)staticaccum, 1);
         #endif
+
+        //now that we figured out all that death crap, let's see if we should be teleporting him.
+        //There are some rules based on his amount of aggression. Aggression increases the more pages
+        //you have, and also accumulates the longer it takes for you to find a page. Finding a page resets
+        //the accumulated aggression but the base aggression increases.
+        uint8_t aggression = numpages - 1 + uint8_t((arduboy.frameCount - timer1) / AGGRESSIONTIME);
+        if(aggression > 8) aggression = 8;
+
+        #ifdef PRINTAGGRESSION
+        arduboy.fillRect(105, 1, 20, 20, BLACK);
+        tinyfont.setTextColor(WHITE);
+        tinyfont.setCursor(105, 1);
+        tinyfont.print(aggression);
+        tinyfont.setCursor(105, 6);
+        tinyfont.print(slenderX);
+        tinyfont.print(" ");
+        tinyfont.print(slenderY);
+        #endif
     }
+
 }
 
 //Shift ALL sprites by the given amount in x and y (whole numbers only please!). Also

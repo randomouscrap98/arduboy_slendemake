@@ -34,6 +34,7 @@ constexpr uint8_t PAGESCALE = 2;
 constexpr uint8_t PAGEMASK = 128;
 constexpr uint8_t NUMLOCATIONS = 10;
 constexpr uint8_t NUMPAGES = 8;
+constexpr uint8_t SLENDERLOCBYTES = 2;
 
 constexpr uint8_t SLENDERSPRITE = 11;
 
@@ -111,3 +112,19 @@ constexpr uint8_t STATICBASES[] PROGMEM = {
 };
 
 constexpr float MINSTATICDISTANCE = 4.0;
+
+constexpr float TELEPORTDISTANCE[] PROGMEM = {
+    //Min, max (per page)
+    255, 255,
+    7, 9.5, //With the player being at 7,7, slender will only spawn in the corners really
+    6, 9.5, //8.5,
+    5, 9.5, //7.5,
+    4, 9.5, //7.0,
+    3, 9.5, //6.5,
+    2, 9.5, //6.0,
+    1, 9.5, //5.5,  //This range will always place him within static distance I think
+    255, 255,
+};
+
+//Every 30 seconds you don't find a page, aggression increases
+constexpr float AGGRESSIONTIME = FRAMERATE * 30;

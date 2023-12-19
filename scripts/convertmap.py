@@ -102,6 +102,7 @@ for obj in objectlayer["objects"]:
     mapx = math.floor(x)
     mapy = math.floor(y)
     mapi = smi(mapx, mapy)
+    mapfraction = math.floor(16 * (x - mapx)) + (math.floor(16 * (y - mapy)) << 4)
 
     # If this is a page sprite, we add it to a special thingy
     if id == pagesprite:
@@ -113,6 +114,7 @@ for obj in objectlayer["objects"]:
         locationid = int(obj["name"]) # Throws an exception if bad, which is good
         slenders[locationid].append(mapx)
         slenders[locationid].append(mapy)
+        # slenders[locationid].append(mapfraction)
         continue
 
     # See if there's already something in the sprite map. If so, fail
@@ -142,10 +144,11 @@ print(f"Dumping to {outfile}")
 # A function for dumping a double array, where internal arrays are uneven
 # sized and you want the output to be an offset into one big array. Used
 # for page and slender locations per "landmark"
-def dumplocbased(basename, data):
+def dumplocbased(basename, data, numbytes):
     print(json.dumps(data))
 
     indexes = []
+    trueraw = []
     totalraw = 0
     f.write("uint8_t " + basename + "_raw[] = {\n")
     for pi in range(len(data)):
@@ -154,17 +157,32 @@ def dumplocbased(basename, data):
         indexes.append(totalraw)
         totalraw += 1
         # Write the length of the section first
-        f.write(f"{len(data[pi]) // 2}, ")
+        f.write(f"{len(data[pi]) // numbytes}, ")
         for v in data[pi]:
             totalraw += 1
             f.write(f"{v},")
+            trueraw.append(v)
         f.write("\n")
     f.write("}\n\n")
+
+    truepos = len(trueraw) // numbytes;
+    assert truepos < 256, "Too many raw locations for indexing with a single byte!"
+    print(f"{basename} positions: {truepos}")
+
+    f.write("uint8_t " + basename + "_trueraw[] = {\n")
+    f.write(f"{len(trueraw) // numbytes},\n")
+    for i,tr in enumerate(trueraw):
+        f.write(f"{tr},")
+        if i % numbytes == numbytes - 1:
+            f.write(" ")
+        if i % numbytes * 10 == numbytes * 10 - 1:
+            f.write("\n")
+    f.write("\n}\n\n")
 
     f.write("uint8_t " + basename + "_offsets[] = {\n")
     for pi in indexes:
         f.write(f"{pi},")
-    f.write("}\n\n")
+    f.write("\n}\n\n")
 
 
 
@@ -190,8 +208,8 @@ with open(outfile, "w") as f:
         f.write("\n")
     f.write("}\n\n")
 
-    dumplocbased("pagelocs", pages)
-    dumplocbased("slenderlocs", slenders)
+    dumplocbased("pagelocs", pages, 2)
+    dumplocbased("slenderlocs", slenders, 2)
 
     f.write('image_t rotbg = "../resources/rotbg.png"\n\n')
     f.write('image_t rotbg_day = "../resources/rotbg_day.png"\n\n')

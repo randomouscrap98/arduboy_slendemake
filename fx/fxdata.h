@@ -6,34 +6,36 @@ using uint24_t = __uint24;
 
 // Initialize FX hardware using  FX::begin(FX_DATA_PAGE); in the setup() function.
 
-constexpr uint16_t FX_DATA_PAGE  = 0xff92;
-constexpr uint24_t FX_DATA_BYTES = 27982;
+constexpr uint16_t FX_DATA_PAGE  = 0xff91;
+constexpr uint24_t FX_DATA_BYTES = 28194;
 
 constexpr uint24_t staticmap_fx = 0x000000;
 constexpr uint24_t staticsprites_fx = 0x001000;
 constexpr uint24_t pagelocs_raw = 0x003000;
-constexpr uint24_t pagelocs_offsets = 0x00306A;
-constexpr uint24_t slenderlocs_raw = 0x003074;
-constexpr uint24_t slenderlocs_offsets = 0x0030F0;
-constexpr uint24_t rotbg = 0x0030FA;
+constexpr uint24_t pagelocs_trueraw = 0x00306A;
+constexpr uint24_t pagelocs_offsets = 0x0030CB;
+constexpr uint24_t slenderlocs_raw = 0x0030D5;
+constexpr uint24_t slenderlocs_trueraw = 0x003151;
+constexpr uint24_t slenderlocs_offsets = 0x0031C4;
+constexpr uint24_t rotbg = 0x0031CE;
 constexpr uint16_t rotbgWidth  = 500;
 constexpr uint16_t rotbgHeight = 64;
 
-constexpr uint24_t rotbg_day = 0x00409E;
+constexpr uint24_t rotbg_day = 0x004172;
 constexpr uint16_t rotbg_day_width  = 500;
 constexpr uint16_t rotbg_day_height = 64;
 
-constexpr uint24_t pages = 0x005042;
+constexpr uint24_t pages = 0x005116;
 constexpr uint16_t pagesWidth  = 48;
 constexpr uint16_t pagesHeight = 64;
 constexpr uint8_t  pagesFrames = 8;
 
-constexpr uint24_t soundgraphic = 0x005C46;
+constexpr uint24_t soundgraphic = 0x005D1A;
 constexpr uint16_t soundgraphicWidth  = 32;
 constexpr uint16_t soundgraphicHeight = 32;
 constexpr uint8_t  soundgraphicFrames = 2;
 
-constexpr uint24_t gameover = 0x005D4A;
+constexpr uint24_t gameover = 0x005E1E;
 constexpr uint16_t gameoverWidth  = 128;
 constexpr uint16_t gameoverHeight = 64;
 constexpr uint8_t  gameoverFrames = 4;
