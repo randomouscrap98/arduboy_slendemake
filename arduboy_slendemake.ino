@@ -15,8 +15,8 @@
 // Some debug junk
 //#define DEBUGPAGES
 //#define DEBUGMOVEMENT
-#define SKIPINTRO
-#define INFINITESPRINT
+//#define SKIPINTRO
+//#define INFINITESPRINT
 //#define SPAWNSLENDERCLOSE
 //#define TELEPORTTONE
 //#define NOSTATICACCUM
@@ -751,7 +751,7 @@ void drawStatic(uint8_t amount) //uint16_t amount)
 
     shadeScreen<WHITE>(&arduboy, (float)lastStatic / 256, 0, 0, SCREENWIDTH, HEIGHT);
 
-    if(lastStatic > 70)
+    if(lastStatic > 50)
         sound.tones(closedrone);
 }
 
