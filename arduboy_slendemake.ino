@@ -18,6 +18,7 @@
 #define SKIPINTRO
 #define INFINITESPRINT
 #define PRINTAGGRESSION
+#define TELEPORTTONE
 //#define SPAWNSLENDERCLOSE
 //#define NOSTATICACCUM
 //#define PRINTSTATIC
@@ -401,24 +402,26 @@ void behavior_slender(RcSprite<NUMINTERNALBYTES> * sprite)
             {
                 slenderX = locdata[0];
                 slenderY = locdata[1];
+                #ifdef TELEPORTTONE
                 sound.tone(400, 50);
+                #endif
             }
 
             //Scan just one location per frame.
             slenderLocScan = (slenderLocScan + 1) % slenderLocTotal;
 
-            if(slenderLocScan == 0)
-            {
-                sound.tone(200, 10);
-                arduboy.fillRect(105, 1, 23, 20, BLACK);
-                tinyfont.setTextColor(WHITE);
-                tinyfont.setCursor(105, 1);
-                tinyfont.print(locdistance, 1);
-                tinyfont.setCursor(105, 6);
-                tinyfont.print(minmax[0], 1);
-                tinyfont.setCursor(105, 11);
-                tinyfont.print(minmax[1], 1);
-            }
+            //if(slenderLocScan == 0)
+            //{
+            //    sound.tone(200, 10);
+            //    arduboy.fillRect(105, 1, 23, 20, BLACK);
+            //    tinyfont.setTextColor(WHITE);
+            //    tinyfont.setCursor(105, 1);
+            //    tinyfont.print(locdistance, 1);
+            //    tinyfont.setCursor(105, 6);
+            //    tinyfont.print(minmax[0], 1);
+            //    tinyfont.setCursor(105, 11);
+            //    tinyfont.print(minmax[1], 1);
+            //}
         }
     }
     else
@@ -481,23 +484,41 @@ void behavior_slender(RcSprite<NUMINTERNALBYTES> * sprite)
         tinyfont.print((float)staticaccum, 1);
         #endif
 
-        //now that we figured out all that death crap, let's see if we should be teleporting him.
-        //There are some rules based on his amount of aggression. Aggression increases the more pages
-        //you have, and also accumulates the longer it takes for you to find a page. Finding a page resets
-        //the accumulated aggression but the base aggression increases.
-        uint8_t aggression = numpages - 1 + uint8_t((arduboy.frameCount - timer1) / AGGRESSIONTIME);
-        if(aggression > 8) aggression = 8;
+        if(!infront)
+        {
+            // now that we figured out all that death crap, let's see if we should be teleporting him.
+            // There are some rules based on his amount of aggression. Aggression increases the more pages
+            // you have, and also accumulates the longer it takes for you to find a page. Finding a page resets
+            // the accumulated aggression but the base aggression increases.
+            uint8_t aggression = numpages + uint8_t((arduboy.frameCount - timer1) / AGGRESSIONTIME);
+            if (aggression > 9)
+                aggression = 9;
+            
+            uint16_t chance = pgm_read_word(FREETELEPORTCHANCE + aggression);
+            
+            if((rand() % (chance)) == 0)
+            {
+                //Slender teleports closer (and through walls, but whatever)
+                slenderX += (dx < -0.5) - (dx > 0.5);
+                slenderY += (dy < -0.5) - (dy > 0.5);
 
-        #ifdef PRINTAGGRESSION
-        arduboy.fillRect(105, 1, 23, 20, BLACK);
-        tinyfont.setTextColor(WHITE);
-        tinyfont.setCursor(105, 1);
-        tinyfont.print(aggression);
-        tinyfont.setCursor(105, 6);
-        tinyfont.print(slenderX);
-        tinyfont.print(" ");
-        tinyfont.print(slenderY);
-        #endif
+                #ifdef TELEPORTTONE
+                sound.tone(200, 50);
+                #endif
+            }
+
+            #ifdef PRINTAGGRESSION
+            arduboy.fillRect(105, 1, 23, 20, BLACK);
+            tinyfont.setTextColor(WHITE);
+            tinyfont.setCursor(105, 1);
+            tinyfont.print(aggression);
+            tinyfont.setCursor(105, 6);
+            tinyfont.print(slenderX);
+            tinyfont.print(" ");
+            tinyfont.print(slenderY);
+            #endif
+        }
+
     }
 
 }

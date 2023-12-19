@@ -128,3 +128,16 @@ constexpr float TELEPORTDISTANCE[] PROGMEM = {
 
 //Every 30 seconds you don't find a page, aggression increases
 constexpr float AGGRESSIONTIME = FRAMERATE * 30;
+
+constexpr uint16_t FREETELEPORTCHANCE[] PROGMEM = {
+    65535,  //No aggression, no teleport
+    FRAMERATE * 8.0, //First aggression level (first page) is very slugish
+    FRAMERATE * 6.0,
+    FRAMERATE * 5.0, 
+    FRAMERATE * 4.5,
+    FRAMERATE * 4.0,
+    FRAMERATE * 3.0,
+    FRAMERATE * 2.0,
+    FRAMERATE * 1.5,
+    FRAMERATE * 1.0, //Move every second. Roughly player speed?
+};
