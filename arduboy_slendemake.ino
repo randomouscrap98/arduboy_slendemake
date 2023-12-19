@@ -366,6 +366,10 @@ void behavior_page(RcSprite<NUMINTERNALBYTES> * sprite)
 
 void behavior_slender(RcSprite<NUMINTERNALBYTES> * sprite)
 {
+    //Don't do things while page is viewed or player is winning (just in case)
+    if(current_pageview || page_bitflag == 255)
+        return;
+
     //Calculate real location. Everything is relative to the player, hence offsetting by the cage center
     int8_t x = slenderX - world_x + CAGEX;
     int8_t y = slenderY - world_y + CAGEY;
@@ -1004,18 +1008,19 @@ void loop()
             slenderX = 255;
             slenderY = 255;
 
-            timer1++;
+            //After page pickup, timer is always set to current frame
+            uint16_t tdiff = arduboy.frameCount - timer1;
             constexpr uint16_t initialfade = FRAMERATE * 6;
             constexpr uint16_t secondaryfade = FRAMERATE * 10 + initialfade;
             constexpr uint16_t finalcut = secondaryfade + FRAMERATE * 2.5f;
 
-            if(timer1 < initialfade)
+            if(tdiff < initialfade)
             {
-                shadeScreen<BLACK>(&arduboy, min(1.0f, timer1 / (FRAMERATE * 4.5f)), 0, 0, WIDTH, HEIGHT);
-                if(timer1 > FRAMERATE * 4.5)
+                shadeScreen<BLACK>(&arduboy, min(1.0f, tdiff / (FRAMERATE * 4.5f)), 0, 0, WIDTH, HEIGHT);
+                if(tdiff > FRAMERATE * 4.5)
                     moveaccum = 0; //Disable sound? kind of a hack
             }
-            else if(timer1 == initialfade)
+            else if(tdiff == initialfade)
             {
                 raycast.render.altWallShading = RcShadingType::None;
                 raycast.render.shading = RcShadingType::White;
@@ -1023,11 +1028,11 @@ void loop()
                 raycast.render.setLightIntensity(DAYLIGHT);
                 current_bg = rotbg_day;
             }
-            else if(timer1 > secondaryfade)
+            else if(tdiff > secondaryfade)
             {
-                shadeScreen<WHITE>(&arduboy, min(1.0f, (timer1 - secondaryfade) / (FRAMERATE * 2.5f)), 0, 0, WIDTH, HEIGHT);
+                shadeScreen<WHITE>(&arduboy, min(1.0f, (tdiff - secondaryfade) / (FRAMERATE * 2.5f)), 0, 0, WIDTH, HEIGHT);
 
-                if(timer1 == finalcut)
+                if(tdiff == finalcut)
                     changeStateClean(GameState::Escape);
             }
         }
