@@ -241,33 +241,35 @@ void movement()
 
     if (arduboy.pressed(RIGHT_BUTTON))
         rotation = -ROTSPEED;
-    if (arduboy.pressed(LEFT_BUTTON))
-        rotation = ROTSPEED;
+    if (arduboy.pressed(LEFT_BUTTON)) //You can always rotate fast
+        rotation = ROTSPEED; 
+    
+    //You can always rotate fast
+    if(arduboy.pressed(B_BUTTON))
+        rotation *= ROTMULTIPLIER;
 
-    if (arduboy.pressed(B_BUTTON) && (movement || rotation))
+    if (arduboy.pressed(B_BUTTON) && movement)
     {
-        #ifndef INFINITESPRINT
-        //We're mean and always drain sprint meter if holding B and moving
-        sprintmeter -= SPRINTDRAIN;
-        #endif
-
-        if(sprintmeter < 0)
-            sprintmeter = 0;
-
         //You're allowed to run if you're already running and there's any sprint left,
         //or if you 'just started' running and there's minimum sprint meter
         if(holding_b && sprintmeter > 0 || sprintmeter > SPRINTMIN)
         {
-            rotation *= ROTMULTIPLIER;
-            movement *= MOVEMULTIPLIER;
-        }
+            #ifndef INFINITESPRINT
+            //Be nice and only drain sprint if we're actually sprinting
+            sprintmeter -= SPRINTDRAIN;
+            #endif
 
-        //End with us knowing if they're holding B
-        holding_b = true;
+            if(sprintmeter < 0)
+                sprintmeter = 0;
+
+            movement *= MOVEMULTIPLIER;
+            holding_b = true;  //End with us knowing if they're holding B
+        }
     }
     else
     {
-        uint16_t newsprint = sprintmeter + SPRINTRECOVER;
+        //Recover double as fast if you're standing still
+        uint16_t newsprint = sprintmeter + SPRINTRECOVER + (movement ? 0 : SPRINTRECOVER);
         sprintmeter = min(newsprint, SPRINTMAX);
         holding_b = false;
     }

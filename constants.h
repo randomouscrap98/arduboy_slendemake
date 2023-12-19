@@ -84,8 +84,8 @@ constexpr int16_t SPRINTMIN_SECS = 1;
 constexpr int16_t SPRINT_SECS = 5;
 constexpr int16_t SPRINTREC_SECS = 15;
 constexpr int16_t SPRINTMAX = FRAMERATE * SPRINTMIN_SECS * SPRINT_SECS * SPRINTREC_SECS; //Realistically, this should just be the lcm of all the literals below
-constexpr int16_t SPRINTMIN = SPRINTMAX / (FRAMERATE * SPRINTMIN_SECS); //If you let go of sprint, you won't be able to sprint again until there's this much sprint available
 constexpr int16_t SPRINTDRAIN = SPRINTMAX / (FRAMERATE * SPRINT_SECS); 
+constexpr int16_t SPRINTMIN = SPRINTDRAIN * (FRAMERATE * SPRINTMIN_SECS); //If you let go of sprint, you won't be able to sprint again until there's this much sprint available
 constexpr int16_t SPRINTRECOVER = SPRINTMAX / (FRAMERATE * SPRINTREC_SECS); 
 
 constexpr UFixed<0,8> WALKSOUNDTRIGGER = 0.8;
