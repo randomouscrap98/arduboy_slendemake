@@ -17,6 +17,8 @@
 //#define DEBUGMOVEMENT         // mega speed 
 //#define SKIPINTRO             // jump immediately into forest
 //#define INFINITESPRINT        // what it says
+//#define INVINCIBLE            // slender will do all his normal things but you won't be impacted
+//#define NOSLENDER             // slenderman just actually doesn't spawn
 //#define SPAWNSLENDERCLOSE     // spawn slenderman before page 1 in front of the entrance
 //#define FORCEAGGRESSION 10    // force slenderman aggression to this value 
 //#define TELEPORTTONE          // play a tone when slenderman teleports. high = spawn teleport, low = chase teleport
@@ -148,7 +150,11 @@ void newgame()
 
     raycast.sprites.resetAll();
 
+    #ifdef NOSLENDER
+    slendersprite = NULL;
+    #else
     slendersprite = raycast.sprites.addSprite(0, 0, SLENDERSPRITE, 1, 0, &behavior_slender);
+    #endif
 
     spawnPages();
 
@@ -523,8 +529,10 @@ void behavior_slender(RcSprite<NUMINTERNALBYTES> * sprite)
 //erases sprites that go outside the usable area
 void shift_sprites(int8_t x, int8_t y)
 {
-    //We allocate slenderman in slot 0, so we skip that in calculations
-    for(uint8_t i = 1; i < NUMSPRITES; i++)
+    //We allocate slenderman in slot 0, so we skip that in calculations IF... he's there. This is 
+    //a silly attempt at reducing calculations; don't want to check EVERY sprite to see if it's slenderman,
+    //would rather assume his position in the array and do it once.
+    for(uint8_t i = slendersprite ? 1 : 0; i < NUMSPRITES; i++)
     {
         RcSprite<NUMINTERNALBYTES> * sp = raycast.sprites[i];
         if(sp->isActive())
@@ -1020,8 +1028,12 @@ void loop()
 
             if(tdiff == 0)
             {
-                //This SHOULD be all you have to do to get rid of slenderman... I think
-                raycast.sprites.deleteLinked(slendersprite);
+                if(slendersprite)
+                {
+                    //This SHOULD be all you have to do to get rid of slenderman... I think
+                    raycast.sprites.deleteLinked(slendersprite);
+                    slendersprite = NULL;
+                }
             }
             if(tdiff < initialfade)
             {
@@ -1050,8 +1062,10 @@ void loop()
             //These are things that happen when you haven't won yet
             bgSound();
             uint8_t s = (uint8_t)min(255, staticaccum + (SFixed<13,2>)staticbase); 
+            #ifndef INVINCIBLE
             if(s == 255)
                 changeStateClean(GameState::Gameover);
+            #endif
             drawStatic(s); //This kind of only works if you call it every frame
         }
     }
