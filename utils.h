@@ -5,3 +5,5 @@
 #if defined(PRINTSTATIC) || defined(PRINTAGGRESSION)
 ARDUBOY_NO_USB
 #endif
+
+//ARDUBOY_NO_USB

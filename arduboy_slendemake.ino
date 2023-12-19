@@ -17,11 +17,11 @@
 //#define DEBUGMOVEMENT
 #define SKIPINTRO
 #define INFINITESPRINT
-#define PRINTAGGRESSION
-#define TELEPORTTONE
 //#define SPAWNSLENDERCLOSE
+//#define TELEPORTTONE
 //#define NOSTATICACCUM
 //#define PRINTSTATIC
+//#define PRINTAGGRESSION
 //#define NOFOG
 //#define ARESTARTS
 //#define DRAWMAP
@@ -750,6 +750,9 @@ void drawStatic(uint8_t amount) //uint16_t amount)
         lastStatic = rand() % amount;
 
     shadeScreen<WHITE>(&arduboy, (float)lastStatic / 256, 0, 0, SCREENWIDTH, HEIGHT);
+
+    if(lastStatic > 70)
+        sound.tones(closedrone);
 }
 
 void doMenu()

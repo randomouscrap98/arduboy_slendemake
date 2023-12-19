@@ -42,3 +42,10 @@ const uint16_t screeching[] PROGMEM = {
   //50,10, 200,10, 600,10,
   TONES_END
 };
+
+const uint16_t closedrone[] PROGMEM = {
+  40, 15,
+  TONES_END
+};
+    //if(lastStatic > 70)
+    //    sound.tone(40, 15);
