@@ -75,6 +75,7 @@ uint8_t staticbase = 0;
 uint8_t lastStatic = 0;
 
 RcContainer<NUMSPRITES, NUMINTERNALBYTES, SCREENWIDTH, HEIGHT> raycast(tilesheet, spritesheet, spritesheet_Mask);
+RcSprite<NUMINTERNALBYTES> * slendersprite;
 
 
 void setup()
@@ -111,6 +112,7 @@ void newgame()
     lastStatic = 0;
     current_bg = rotbg;
     timer1 = 0;
+    bgsoundtimer = 0;
 
     world_x = 33;
     world_y = 60;
@@ -147,7 +149,7 @@ void newgame()
 
     raycast.sprites.resetAll();
 
-    RcSprite<NUMINTERNALBYTES> * slender = raycast.sprites.addSprite(0, 0, SLENDERSPRITE, 1, 0, &behavior_slender);
+    slendersprite = raycast.sprites.addSprite(0, 0, SLENDERSPRITE, 1, 0, &behavior_slender);
 
     spawnPages();
 
@@ -1004,16 +1006,17 @@ void loop()
 
         if(page_bitflag == 255)
         {
-            //these really only need to be set once but whatever
-            slenderX = 255;
-            slenderY = 255;
-
             //After page pickup, timer is always set to current frame
             uint16_t tdiff = arduboy.frameCount - timer1;
             constexpr uint16_t initialfade = FRAMERATE * 6;
             constexpr uint16_t secondaryfade = FRAMERATE * 10 + initialfade;
             constexpr uint16_t finalcut = secondaryfade + FRAMERATE * 2.5f;
 
+            if(tdiff == 0)
+            {
+                //This SHOULD be all you have to do to get rid of slenderman... I think
+                raycast.sprites.deleteLinked(slendersprite);
+            }
             if(tdiff < initialfade)
             {
                 shadeScreen<BLACK>(&arduboy, min(1.0f, tdiff / (FRAMERATE * 4.5f)), 0, 0, WIDTH, HEIGHT);
