@@ -84,9 +84,7 @@ void setup()
     // Initialize the Arduboy
     arduboy.boot();
     arduboy.flashlight();
-    arduboy.initRandomSeed();
     arduboy.setFrameRate(FRAMERATE);
-    arduboy.initRandomSeed();
     FX::begin(FX_DATA_PAGE);    // initialise FX chip
 
     raycast.render.spritescaling[0] = 2.0;
@@ -792,7 +790,10 @@ void doMenu()
         shadeScreen<BLACK>(&arduboy, 1 - (timer1 - arduboy.frameCount) / (float)STDFADE, 0, 0, WIDTH, HEIGHT);
 
         if(arduboy.frameCount >= timer1)
+        {
             state = GameState::Intro;
+            srand(millis());
+        }
     }
     else if(arduboy.justPressed(A_BUTTON))
     {
