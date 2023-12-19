@@ -13,19 +13,20 @@
 #include <ArduboyRaycast_Shading.h>
 
 // Some debug junk
-//#define DEBUGPAGES
-#define DEBUGMOVEMENT
-#define SKIPINTRO
-#define INFINITESPRINT
-//#define SPAWNSLENDERCLOSE
-//#define TELEPORTTONE
-//#define NOSTATICACCUM
-//#define PRINTSTATIC
-//#define PRINTAGGRESSION
-//#define NOFOG
-//#define ARESTARTS
-//#define DRAWMAP
-//#define VARIABLEFPS
+//#define DEBUGPAGES            // put all pages at the entrance
+//#define DEBUGMOVEMENT         // mega speed 
+//#define SKIPINTRO             // jump immediately into forest
+//#define INFINITESPRINT        // what it says
+//#define SPAWNSLENDERCLOSE     // spawn slenderman before page 1 in front of the entrance
+//#define FORCEAGGRESSION 10    // force slenderman aggression to this value 
+//#define TELEPORTTONE          // play a tone when slenderman teleports. high = spawn teleport, low = chase teleport
+//#define NOSTATICACCUM         // disable death by looking at slenderman
+//#define PRINTSTATIC           // print 'death static' info (very slow, disables usb)
+//#define PRINTAGGRESSION       // print 'aggression' info (very slow, disables usb)
+//#define NOFOG                 // disable all fog
+//#define ARESTARTS             // allow A to restart level
+//#define DRAWMAP               // draw a map (useless since everything is a sprite)
+//#define VARIABLEFPS           // increase fps but have slowdowns when looking at too much
 
 // Graphics / resources
 #include "spritesheet.h"
@@ -484,8 +485,12 @@ void behavior_slender(RcSprite<NUMINTERNALBYTES> * sprite)
             // you have, and also accumulates the longer it takes for you to find a page. Finding a page resets
             // the accumulated aggression but the base aggression increases.
             uint8_t aggression = numpages + uint8_t((arduboy.frameCount - timer1) / AGGRESSIONTIME);
-            if (aggression > 9)
-                aggression = 9;
+            if (aggression > AGGRESIONLEVELS)
+                aggression = AGGRESIONLEVELS;
+            
+            #ifdef FORCEAGGRESSION
+            aggression = FORCEAGGRESSION;
+            #endif
             
             uint16_t chance = pgm_read_word(FREETELEPORTCHANCE + aggression);
             
