@@ -392,7 +392,7 @@ void behavior_slender(RcSprite<NUMINTERNALBYTES> * sprite)
             float locdistance = sqrt(dx * dx + dy * dy);
 
             float minmax[2];
-            memcpy_P(minmax, TELEPORTDISTANCE + 2 * sizeof(float) * numpages, 2 * sizeof(float));
+            memcpy_P(minmax, TELEPORTDISTANCE + 2 * numpages, 2 * sizeof(float));
 
             //The distance has to be within some range for us to use it. We also don't want slenderman teleporting
             //when he's too close to the player (or at least, for most of the page) so we prevent that too
@@ -410,6 +410,14 @@ void behavior_slender(RcSprite<NUMINTERNALBYTES> * sprite)
             if(slenderLocScan == 0)
             {
                 sound.tone(200, 10);
+                arduboy.fillRect(105, 1, 23, 20, BLACK);
+                tinyfont.setTextColor(WHITE);
+                tinyfont.setCursor(105, 1);
+                tinyfont.print(locdistance, 1);
+                tinyfont.setCursor(105, 6);
+                tinyfont.print(minmax[0], 1);
+                tinyfont.setCursor(105, 11);
+                tinyfont.print(minmax[1], 1);
             }
         }
     }
@@ -481,7 +489,7 @@ void behavior_slender(RcSprite<NUMINTERNALBYTES> * sprite)
         if(aggression > 8) aggression = 8;
 
         #ifdef PRINTAGGRESSION
-        arduboy.fillRect(105, 1, 20, 20, BLACK);
+        arduboy.fillRect(105, 1, 23, 20, BLACK);
         tinyfont.setTextColor(WHITE);
         tinyfont.setCursor(105, 1);
         tinyfont.print(aggression);
