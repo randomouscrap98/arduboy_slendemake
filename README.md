@@ -1,7 +1,11 @@
 # Spooky Walking Simulator
 Or, a demake of Slender: The Eight Pages for Arduboy. 
 
+<img alt="A gif of the slendemake gameplay" src="https://github.com/randomouscrap98/arduboy_slendemake/assets/13357277/6a01c649-c0d4-4e5a-8803-f030e38fd025" width="256">
+
 This was made for the Arduboy Meme Game Jam 2023: https://community.arduboy.com/t/arduboy-fx-meme-jam/11560
+
+Community post, you can play it in your browser: https://community.arduboy.com/t/spooky-walking-simulator-fx/11687
 
 ## Requirements to build
 You'll need the following libraries:
